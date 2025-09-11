@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌍 English Quest - Regions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+        min-height: 100vh;
+        color: #f1f5f9;
+        overflow-x: hidden;
+      }
+      .title {
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      }
+      .region-card {
+        perspective: 1000px;
+        cursor: pointer;
+      }
+      .region-inner {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      }
+      .region-card:hover .region-inner {
+        transform: rotateY(180deg);
+      }
+      .region-front,
+      .region-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 1rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 1.25rem;
+        color: #fff;
+      }
+      .region-front {
+        background-size: cover;
+        background-position: center;
+      }
+      .region-overlay {
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.75),
+          rgba(0, 0, 0, 0.1)
+        );
+        position: absolute;
+        inset: 0;
+      }
+      .region-front h2 {
+        position: relative;
+        z-index: 1;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .region-back {
+        background: #1e293b;
+        transform: rotateY(180deg);
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+      }
+      .region-back p {
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="text-center py-10">
+      <h1 class="title text-3xl md:text-5xl text-sky-200">🌍 English Quest</h1>
+      <p class="mt-3 text-sky-100 text-lg">
+        Travel through six regions to master spoken English
+      </p>
+    </header>
+
+    <!-- navigation button for navigate the analytics and dashboard page -->
+    <div class="text-center mb-6 gap-3">
+      <button
+        class="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 m-2 rounded-lg transition"
+        onclick="window.location.href='dashboard.html'"
+      >
+        📊 Dashboard
+      </button>
+      <button
+        class="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 m-2 rounded-lg transition"
+        onclick="window.location.href='analytics.html'"
+      >
+        📈 Analytics
+      </button>
+      <button
+        class="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 m-2 rounded-lg transition"
+        onclick="window.location.href='#home'"
+      >
+        🏠 Home
+      </button>
+    </div>
+    <main
+      class="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-16"
+    >
+      <!-- Village -->
+      <div
+        class="region-card"
+        onclick="window.location.href='village-index.html'"
+      >
+        <div class="region-inner">
+          <div
+            class="region-front"
+            style="
+              background-image: url('https://tse3.mm.bing.net/th/id/OIP.BmdYu152he-Ri1MwljlJegHaEK?w=306&h=180&c=7&r=0&o=7&dpr=1.4&pid=1.7&rm=3');
+            "
+          >
+            <div class="region-overlay"></div>
+            <h2>🏡 Village</h2>
+          </div>
+          <div class="region-back">
+            <p>“Begin your journey with simple conversations.”</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Valley -->
+      <div class="region-card" onclick="window.location.href='valley.html'">
+        <div class="region-inner">
+          <div
+            class="region-front"
+            style="
+              background-image: url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=800&q=80');
+            "
+          >
+            <div class="region-overlay"></div>
+            <h2>⛰ Valley</h2>
+          </div>
+          <div class="region-back"><p>“Flow with rhythm and clarity.”</p></div>
+        </div>
+      </div>
+
+      <!-- Forest -->
+      <div
+        class="region-card"
+        onclick="window.location.href='forest-index.html'"
+      >
+        <div class="region-inner">
+          <div
+            class="region-front"
+            style="
+              background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80');
+            "
+          >
+            <div class="region-overlay"></div>
+            <h2>🌳 Forest</h2>
+          </div>
+          <div class="region-back">
+            <p>“Grow stronger with natural expression.”</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mountain -->
+      <div
+        class="region-card"
+        onclick="window.location.href='mountain-index.html'"
+      >
+        <div class="region-inner">
+          <div
+            class="region-front"
+            style="
+              background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80');
+            "
+          >
+            <div class="region-overlay"></div>
+            <h2>🏔 Mountain</h2>
+          </div>
+          <div class="region-back">
+            <p>“Climb with pronunciation & confidence.”</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ocean -->
+      <div
+        class="region-card"
+        onclick="window.location.href='ocean-index.html'"
+      >
+        <div class="region-inner">
+          <div
+            class="region-front"
+            style="
+              background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80');
+            "
+          >
+            <div class="region-overlay"></div>
+            <h2>🌊 Ocean</h2>
+          </div>
+          <div class="region-back">
+            <p>“Dive deep into fluency & real-life talks.”</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- City -->
+      <div class="region-card" onclick="window.location.href='city.html'">
+        <div class="region-inner">
+          <div
+            class="region-front"
+            style="
+              background-image: url('https://tse4.mm.bing.net/th/id/OIP.0YA2Z7APV0Reg490hC0XUgHaE7?w=270&h=180&c=7&r=0&o=7&dpr=1.4&pid=1.7&rm=3');
+            "
+          >
+            <div class="region-overlay"></div>
+            <h2>🌆 City</h2>
+          </div>
+          <div class="region-back">
+            <p>“Master advanced English like a native.”</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="text-center text-sky-200 text-sm pb-6">
+      © 2025 English Quest
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>🌊 Ocean Quest — Interactive Speaking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --deep: #023047;
+        --sea: #06b6d4;
+        --teal: #0ea5a4;
+        --sand: #f8e7d6;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: Quicksand, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        background: linear-gradient(
+          180deg,
+          #e6f9ff 0%,
+          #dff7fb 40%,
+          #f0fcff 100%
+        );
+        color: #083344;
+        -webkit-font-smoothing: antialiased;
+      }
+      /* header */
+      .title {
+        font-family: "Press Start 2P", cursive;
+        letter-spacing: 1px;
+      }
+      /* ocean waves */
+      .wave-wrap {
+        position: relative;
+        height: 160px;
+        overflow: hidden;
+        border-radius: 14px;
+      }
+      .wave {
+        position: absolute;
+        bottom: 0;
+        width: 200%;
+        height: 140%;
+        background-repeat: repeat-x;
+        opacity: 0.6;
+        transform: translate3d(0, 0, 0);
+      }
+      .wave.wave1 {
+        background: linear-gradient(
+          180deg,
+          rgba(6, 182, 212, 0.45),
+          rgba(3, 107, 107, 0.45)
+        );
+        animation: wm1 10s linear infinite;
+        z-index: 3;
+      }
+      .wave.wave2 {
+        background: linear-gradient(
+          180deg,
+          rgba(6, 182, 212, 0.28),
+          rgba(3, 107, 107, 0.18)
+        );
+        animation: wm2 16s linear infinite;
+        z-index: 2;
+      }
+      .wave.wave3 {
+        background: linear-gradient(
+          180deg,
+          rgba(6, 182, 212, 0.12),
+          rgba(3, 107, 107, 0.08)
+        );
+        animation: wm3 26s linear infinite;
+        z-index: 1;
+      }
+      @keyframes wm1 {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+      @keyframes wm2 {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-40%);
+        }
+      }
+      @keyframes wm3 {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-30%);
+        }
+      }
+
+      /* boat */
+      .boat {
+        width: 120px;
+        height: 56px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #fff, #e6faff);
+        box-shadow: 0 6px 26px rgba(3, 15, 17, 0.12);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .bob {
+        animation: bob 3s ease-in-out infinite;
+      }
+      @keyframes bob {
+        0% {
+          transform: translateY(-6px);
+        }
+        50% {
+          transform: translateY(6px);
+        }
+        100% {
+          transform: translateY(-6px);
+        }
+      }
+
+      /* UI */
+      .glass {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.75),
+          rgba(255, 255, 255, 0.65)
+        );
+        box-shadow: 0 8px 30px rgba(2, 6, 23, 0.06);
+        border-radius: 16px;
+        padding: 14px;
+      }
+      .meter-bar {
+        transition: width 600ms cubic-bezier(0.2, 0.9, 0.2, 1);
+      }
+      .shake {
+        animation: shake 0.6s;
+      }
+      @keyframes shake {
+        0% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-6px);
+        }
+        50% {
+          transform: translateX(6px);
+        }
+        75% {
+          transform: translateX(-4px);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+      .glow {
+        box-shadow: 0 8px 36px rgba(6, 182, 212, 0.18);
+        transform: translateY(-6px);
+      }
+
+      /* small responsive */
+      @media (max-width: 640px) {
+        .wave-wrap {
+          height: 108px;
+        }
+        .boat {
+          width: 88px;
+          height: 44px;
+        }
+      }
+      /* utility */
+      .btn-primary {
+        background: linear-gradient(90deg, var(--teal), var(--sea));
+        color: white;
+        padding: 0.6rem 1rem;
+        border-radius: 10px;
+        font-weight: 700;
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid rgba(3, 15, 17, 0.06);
+        padding: 0.5rem 0.8rem;
+        border-radius: 10px;
+      }
+      .kbd {
+        background: #072b2b;
+        color: #c8fffb;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="max-w-6xl mx-auto p-4">
+      <header class="flex items-center justify-between gap-4 mb-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-14 h-14 rounded-lg bg-gradient-to-br from-teal-400 to-sea-400 flex items-center justify-center shadow-lg"
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M3 12s2-6 9-6 9 6 9 6-2 6-9 6S3 12 3 12z"
+                stroke="white"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div>
+            <div class="title text-lg">Ocean Region — Advanced Speaking</div>
+            <div class="text-xs text-slate-600">
+              Real-time spoken conversations • voice + typing fallback
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="text-xs text-slate-500">Global XP</div>
+            <div id="globalXp" class="text-lg font-bold">0</div>
+          </div>
+          <button id="indexBtn" class="btn-ghost">⟵ Index</button>
+        </div>
+      </header>
+
+      <main class="grid grid-cols-12 gap-6">
+        <!-- left: levels -->
+        <aside class="col-span-12 lg:col-span-4">
+          <div class="glass">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <strong>Levels — Ocean</strong>
+                <div class="text-xs text-slate-600">Speak to progress</div>
+              </div>
+              <div class="text-xs text-slate-500">Unlock: Mountain ≥70%</div>
+            </div>
+
+            <div
+              id="levelsList"
+              class="space-y-3 max-h-[60vh] overflow-y-auto pr-2"
+            ></div>
+
+            <div class="mt-4 text-xs text-slate-600">
+              <div>Each level: 10 conversation prompts</div>
+              <div>
+                Pass = at least <strong>7/10</strong> prompts with acceptable
+                fluency
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- right: gameplay -->
+        <section class="col-span-12 lg:col-span-8">
+          <div class="glass mb-4">
+            <div class="mb-4">
+              <div class="wave-wrap rounded-lg mb-3" id="oceanVisual">
+                <div class="wave wave3"></div>
+                <div class="wave wave2"></div>
+                <div class="wave wave1"></div>
+
+                <div
+                  id="boatContainer"
+                  style="
+                    position: absolute;
+                    left: 6%;
+                    bottom: 12px;
+                    transition: left 0.8s, bottom 0.8s;
+                  "
+                >
+                  <div id="boat" class="boat bob relative">
+                    <div
+                      style="
+                        position: absolute;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        bottom: 8px;
+                        height: 30px;
+                        width: 4px;
+                        background: #183434;
+                        border-radius: 2px;
+                      "
+                    ></div>
+                    <div style="position: absolute; left: 46%; bottom: 18px">
+                      <svg
+                        width="36"
+                        height="36"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M3 12c0 0 4-8 9-8"
+                          stroke="#036b6b"
+                          stroke-width="1.6"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <div class="text-sm text-slate-600">Current Level</div>
+                  <div id="currentLevelTitle" class="text-xl font-bold">—</div>
+                  <div id="currentLevelSubtitle" class="text-xs text-slate-500">
+                    —
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-slate-500">Level XP</div>
+                  <div id="levelXp" class="text-lg font-bold">0 / 10</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div
+              class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+            >
+              <div class="flex items-center gap-3">
+                <button id="micBtn" class="btn-primary flex items-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 1v11"
+                      stroke="white"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M5 11a7 7 0 0 0 14 0"
+                      stroke="white"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <span id="micLabel">Start Mic</span>
+                </button>
+
+                <div class="flex items-center gap-2">
+                  <div class="text-xs text-slate-500">Input</div>
+                  <button id="toggleInput" class="btn-ghost text-sm">
+                    Use keyboard
+                  </button>
+                </div>
+
+                <button id="hintBtn" class="btn-ghost text-sm">Hint</button>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="text-xs text-slate-500">Retries</div>
+                <div id="retries" class="font-semibold">2</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conversation area -->
+          <div class="glass p-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div class="md:col-span-2">
+                <div
+                  id="assistantBubble"
+                  class="p-4 rounded-lg bg-white/80 text-deep shadow-sm min-h-[84px]"
+                >
+                  <div id="assistantText" class="text-sm text-deep">
+                    Select a level to start. The assistant will speak a prompt —
+                    reply by voice or type.
+                  </div>
+                </div>
+
+                <div class="mt-4 flex items-center gap-2">
+                  <div class="flex-1">
+                    <textarea
+                      id="typeInput"
+                      rows="2"
+                      placeholder="Type your reply here (fallback) ..."
+                      class="w-full p-3 rounded-lg border border-slate-200 hidden"
+                    ></textarea>
+                  </div>
+                  <div>
+                    <button id="sendText" class="btn-primary hidden">
+                      Send
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-3 text-xs text-slate-500">
+                  Tip: Press <span class="kbd">Space</span> to toggle mic,
+                  <span class="kbd">Enter</span> to submit typed reply
+                </div>
+              </div>
+
+              <div>
+                <div class="p-3 bg-slate-50 rounded-lg text-sm">
+                  <div class="text-xs text-slate-500 mb-1">Fluency Timer</div>
+                  <div id="fluencyTimer" class="text-2xl font-bold">0s</div>
+                  <div class="text-xs text-slate-500 mt-1">
+                    Speak at least 5s to be eligible
+                  </div>
+                </div>
+
+                <div class="mt-3 p-3 bg-slate-50 rounded-lg text-sm">
+                  <div class="text-xs text-slate-500 mb-1">Confidence</div>
+                  <div
+                    class="w-full bg-slate-200 h-3 rounded-full overflow-hidden"
+                  >
+                    <div
+                      id="confidenceBar"
+                      class="h-3 meter-bar w-6 bg-amber-400"
+                    ></div>
+                  </div>
+                  <div id="confidenceText" class="text-xs text-slate-500 mt-2">
+                    Smoothness: N/A
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <div
+                id="history"
+                class="space-y-2 text-sm text-slate-700 max-h-[220px] overflow-y-auto"
+              ></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="text-center text-xs text-slate-500 mt-6">
+        Ocean Region — Speak to improve fluency
+      </footer>
+    </div>
+
+    <script>
+      /* -------------------------
+   Data / Level Prompts
+   Each level contains 10 prompts (strings). This is conversational: assistant says prompt,
+   user replies by voice or typing. System evaluates fluency, length, politeness heuristics.
+   ------------------------- */
+      const LEVELS = [
+        {
+          id: 1,
+          title: "Polite Conversations",
+          prompts: [
+            "Excuse me, could you help me find the library?",
+            "Could you please repeat that?",
+            "Do you mind if I ask a quick question?",
+            "Could you tell me where the restroom is, please?",
+            "I’m sorry to bother you, may I ask something?",
+            "Would you mind lowering your voice, please?",
+            "Thank you very much for your help.",
+            "Could you explain that one more time?",
+            "Pardon me, is this seat taken?",
+            "Could I have your contact details, please?",
+          ],
+        },
+        {
+          id: 2,
+          title: "Restaurant Roleplay",
+          prompts: [
+            "Hello, I would like to order the chicken biryani, please.",
+            "Could I see the dessert menu?",
+            "Is this dish spicy? Can you recommend something mild?",
+            "Could I have the bill, please?",
+            "Do you have any vegetarian options?",
+            "Could I get that to go, please?",
+            "Can I change my order, please?",
+            "What desserts do you recommend?",
+            "Could you tell me what ingredients are in this dish?",
+            "Thank you — the meal was wonderful.",
+          ],
+        },
+        {
+          id: 3,
+          title: "Shopping Challenge",
+          prompts: [
+            "How much does this jacket cost?",
+            "Do you have this in medium?",
+            "Is there any discount available on this item?",
+            "Could you show me another color?",
+            "Can I try this on, please?",
+            "Do you offer home delivery?",
+            "What is your return policy for this product?",
+            "Can you hold this while I check the size?",
+            "Would you accept a card payment?",
+            "Could you gift-wrap this item, please?",
+          ],
+        },
+        {
+          id: 4,
+          title: "Telephone Talk",
+          prompts: [
+            "Hello, I’d like to book a ticket for tomorrow.",
+            "Could you confirm my reservation, please?",
+            "I am calling to check the status of my order.",
+            "Could you put me through to customer service?",
+            "I’m afraid I missed the call — could you repeat the details?",
+            "Can I reschedule my appointment to next week?",
+            "Could you tell me the reference number again, please?",
+            "I would like to cancel my booking — how do I proceed?",
+            "Is this the correct number for enquiries?",
+            "Thank you for your help. Goodbye.",
+          ],
+        },
+        {
+          id: 5,
+          title: "Travel & Directions",
+          prompts: [
+            "How can I reach the station from here?",
+            "Is there a bus that goes to the central market?",
+            "Which landmark is closest to the hotel?",
+            "Could you tell me the fastest way to the airport?",
+            "How long will it take to walk there?",
+            "Are taxis available nearby?",
+            "Could you show that on a map, please?",
+            "Is it safe to walk there at night?",
+            "Which platform does the express train leave from?",
+            "Thank you — that was very helpful.",
+          ],
+        },
+        {
+          id: 6,
+          title: "Workplace Mini-Interview",
+          prompts: [
+            "Tell me about yourself.",
+            "Why should we hire you for this role?",
+            "Describe a challenge you overcame at work.",
+            "What are your strengths and weaknesses?",
+            "Where do you see yourself in five years?",
+            "How do you handle tight deadlines?",
+            "Give an example of teamwork you participated in.",
+            "Describe a successful project you led.",
+            "How do you prioritize tasks?",
+            "Why are you interested in our company?",
+          ],
+        },
+        {
+          id: 7,
+          title: "Problem Solving Talk",
+          prompts: [
+            "My room is not clean. How would you respond?",
+            "My internet is not working — what should I say?",
+            "The food I ordered is cold. How to complain politely?",
+            "A product arrived damaged. How to request replacement?",
+            "The elevator is stuck. How to inform reception?",
+            "My appointment was missed. How to ask for reschedule?",
+            "There is a loud noise next door. How do I complain politely?",
+            "The taxi driver took a longer route. How to address it?",
+            "My refund has not arrived. How to ask for update?",
+            "Thank you — I appreciate your assistance.",
+          ],
+        },
+        {
+          id: 8,
+          title: "Emergency Communication",
+          prompts: [
+            "There has been an accident at the junction near Main Street. Please send help.",
+            "I need an ambulance at 45 Baker Road. Someone is injured.",
+            "My house is on fire — call the fire department now.",
+            "There is a theft in progress at the shop. Please send the police.",
+            "I’ve been in a car crash. I need immediate assistance.",
+            "Please tell me how to perform basic first aid for bleeding.",
+            "My child is unconscious. What should I do until help arrives?",
+            "We are trapped inside an elevator. Contact emergency services.",
+            "There is a gas smell in the building — evacuate immediately.",
+            "Thank you — help is on the way.",
+          ],
+        },
+        {
+          id: 9,
+          title: "Storytelling & Daily Life",
+          prompts: [
+            "What did you do yesterday? Tell me in detail.",
+            "Describe your plans for next weekend.",
+            "Tell a short story about a memorable trip.",
+            "What is your morning routine like?",
+            "Share an experience that taught you a lesson.",
+            "Describe a hobby you enjoy and why.",
+            "Talk about a movie that influenced you.",
+            "Explain how you practice English daily.",
+            "Describe your favorite holiday traditions.",
+            "What are your goals for the next year?",
+          ],
+        },
+        {
+          id: 10,
+          title: "Ocean Deep Talk - Boss",
+          prompts: [
+            "Talk about your hobbies and why you enjoy them.",
+            "Discuss cultural differences you’ve experienced.",
+            "Describe a movie and what you learned from it.",
+            "Share your future plans and aspirations in detail.",
+            "Explain a challenge you overcame and how.",
+            "Talk about a person who inspires you and why.",
+            "Describe how learning English changed your life.",
+            "Discuss your dream job and what steps you’ll take.",
+            "Talk about a topic you’re passionate about for 2-3 minutes.",
+            "Reflect on your progress and next steps for fluency.",
+          ],
+        },
+      ];
+
+      /* -------------------------
+   State
+   ------------------------- */
+      const PROFILE_KEY = "fqx_ocean_profile_v1";
+      const MOUNTAIN_KEY = "fqx_mountain_profile_v2"; // to check unlocking
+      let profile = loadProfile();
+      let currentLevel = 1;
+      let promptIndex = 0;
+      let correctCount = 0;
+      let attemptsLeft = 2; // per prompt
+      let listening = false;
+      let recognition = null;
+      let sessionTranscript = "";
+      let fluencySeconds = 0;
+      let fluencyTimer = null;
+      let confidence = 0; // 0..100
+      let inputMode = "voice"; // or 'text'
+
+      /* -------------------------
+   Helpers: storage, unlock checks
+   ------------------------- */
+      function loadProfile() {
+        try {
+          const raw = localStorage.getItem(PROFILE_KEY);
+          if (!raw)
+            return { perLevelBest: Array(10).fill(0), unlockedLevel: 0 };
+          const p = JSON.parse(raw);
+          if (!p.perLevelBest || p.perLevelBest.length !== 10)
+            p.perLevelBest = Array(10).fill(0);
+          if (typeof p.unlockedLevel !== "number") p.unlockedLevel = 0;
+          return p;
+        } catch (e) {
+          return { perLevelBest: Array(10).fill(0), unlockedLevel: 0 };
+        }
+      }
+      function saveProfile() {
+        try {
+          localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        } catch (e) {}
+      }
+      function mountainUnlocked() {
+        try {
+          const raw = localStorage.getItem(MOUNTAIN_KEY);
+          if (!raw) return false;
+          const m = JSON.parse(raw);
+          const total = (m.perLevelBest || []).reduce((a, b) => a + b, 0);
+          const max = 10 * 10; // Mountain design: each level stored as up to 10
+          return total >= max * 0.7; // 70%
+        } catch (e) {
+          return false;
+        }
+      }
+
+      /* -------------------------
+   UI wiring
+   ------------------------- */
+      const levelsList = document.getElementById("levelsList");
+      const currentLevelTitle = document.getElementById("currentLevelTitle");
+      const currentLevelSubtitle = document.getElementById(
+        "currentLevelSubtitle"
+      );
+      const assistantText = document.getElementById("assistantText");
+      const micBtn = document.getElementById("micBtn");
+      const micLabel = document.getElementById("micLabel");
+      const typeInput = document.getElementById("typeInput");
+      const toggleInput = document.getElementById("toggleInput");
+      const sendText = document.getElementById("sendText");
+      const historyEl = document.getElementById("history");
+      const fluencyTimerEl = document.getElementById("fluencyTimer");
+      const confidenceBar = document.getElementById("confidenceBar");
+      const confidenceText = document.getElementById("confidenceText");
+      const levelXpEl = document.getElementById("levelXp");
+      const retriesEl = document.getElementById("retries");
+      const globalXpEl = document.getElementById("globalXp");
+      const indexBtn = document.getElementById("indexBtn");
+      const hintBtn = document.getElementById("hintBtn");
+
+      indexBtn.addEventListener(
+        "click",
+        () => (window.location.href = "ocean-index.html")
+      );
+      toggleInput.addEventListener("click", toggleInputMode);
+      sendText.addEventListener("click", submitTyped);
+      hintBtn.addEventListener("click", () => showHint());
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          micBtn.click();
+        }
+        if (e.key === "Enter" && inputMode === "text" && !e.shiftKey) {
+          e.preventDefault();
+          submitTyped();
+        }
+      });
+
+      /* -------------------------
+   Render levels list
+   ------------------------- */
+      function renderLevelsList() {
+        levelsList.innerHTML = "";
+        const unlockedM = mountainUnlocked();
+        LEVELS.forEach((lv, idx) => {
+          const unlocked = unlockedM && idx <= profile.unlockedLevel;
+          const passCount = profile.perLevelBest[idx] || 0;
+          const card = document.createElement("div");
+          card.className =
+            "p-3 rounded-lg mb-2 " +
+            (unlocked ? "bg-white/80" : "bg-slate-200/40 locked");
+          card.style.cursor = unlocked ? "pointer" : "not-allowed";
+          card.innerHTML = `
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <div class="font-semibold text-sm">${idx + 1}. ${lv.title}</div>
+          <div class="text-xs text-slate-600">${lv.prompts[0].slice(
+            0,
+            44
+          )}...</div>
+        </div>
+        <div class="text-xs text-slate-600 text-right">
+          Best: <strong>${passCount} / 10</strong><br/>
+          ${
+            unlocked
+              ? '<span class="text-green-600">Play</span>'
+              : '<span class="text-yellow-600">Locked</span>'
+          }
+        </div>
+      </div>
+    `;
+          if (unlocked)
+            card.addEventListener("click", () => startLevel(idx + 1));
+          levelsList.appendChild(card);
+        });
+      }
+      renderLevelsList();
+
+      /* -------------------------
+   Level flow
+   ------------------------- */
+      function startLevel(n) {
+        currentLevel = n;
+        promptIndex = 0;
+        correctCount = 0;
+        attemptsLeft = 2;
+        sessionTranscript = "";
+        fluencySeconds = 0;
+        updateLevelUI();
+        historyEl.innerHTML = "";
+        speakAndPrompt(); // begin conversation
+      }
+
+      function updateLevelUI() {
+        const lv = LEVELS[currentLevel - 1];
+        currentLevelTitle.innerText = `Level ${currentLevel} — ${lv.title}`;
+        currentLevelSubtitle.innerText = lv.title;
+        levelXpEl.innerText = `${correctCount} / ${lv.prompts.length}`;
+        retriesEl.innerText = attemptsLeft;
+        globalXpEl.innerText = computeGlobalXP();
+        // move boat visually by percent of region xp (use profile sum)
+        updateBoat();
+      }
+
+      /* -------------------------
+   Speech Recognition & TTS
+   ------------------------- */
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition || null;
+      function initRecognition() {
+        if (!SpeechRecognition) return null;
+        const r = new SpeechRecognition();
+        r.lang = "en-US";
+        r.interimResults = true;
+        r.maxAlternatives = 1;
+        r.onstart = () => {
+          listening = true;
+          micLabel.innerText = "Listening...";
+          startFluencyTimer();
+        };
+        r.onend = () => {
+          listening = false;
+          micLabel.innerText = "Start Mic";
+          stopFluencyTimer();
+        };
+        r.onerror = (e) => {
+          console.warn("rec error", e);
+          listening = false;
+          micLabel.innerText = "Start Mic";
+          stopFluencyTimer();
+        };
+        let interim = "";
+        r.onresult = (ev) => {
+          let transcript = "";
+          for (let i = ev.resultIndex; i < ev.results.length; i++) {
+            transcript += ev.results[i][0].transcript;
+          }
+          interim = transcript;
+          sessionTranscript = transcript;
+          // update confidence heuristic if available
+          const last = ev.results[ev.results.length - 1][0];
+          if (last && typeof last.confidence === "number")
+            confidence = Math.round(last.confidence * 100);
+          else
+            confidence = Math.min(
+              100,
+              Math.round(Math.min(1, transcript.length / 120) * 100)
+            );
+          updateConfidenceUI();
+          // show typed transcript if input mode set
+          if (inputMode === "text") {
+            typeInput.value = transcript;
+            typeInput.classList.remove("hidden");
+            sendText.classList.remove("hidden");
+          }
+        };
+        return r;
+      }
+      recognition = initRecognition();
+
+      function speak(text, opts = {}) {
+        // use SpeechSynthesis for assistant voice
+        try {
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = opts.lang || "en-US";
+          u.rate = opts.rate || 1;
+          u.pitch = opts.pitch || 1;
+          u.volume = opts.volume || 1;
+          u.onend = () => {
+            /* no-op */
+          };
+          speechSynthesis.cancel();
+          speechSynthesis.speak(u);
+        } catch (e) {
+          console.warn("tts fail", e);
+        }
+      }
+
+      /* -------------------------
+   Conversation logic
+   ------------------------- */
+      function speakAndPrompt() {
+        const lv = LEVELS[currentLevel - 1];
+        if (!lv) return;
+        if (promptIndex >= lv.prompts.length) {
+          finishLevel();
+          return;
+        }
+        attemptsLeft = 2;
+        sessionTranscript = "";
+        fluencySeconds = 0;
+        confidence = 0;
+        updateConfidenceUI();
+        updateLevelUI();
+
+        const prompt = lv.prompts[promptIndex];
+        assistantText.innerText = "Assistant: " + prompt;
+        historyAdd("assistant", prompt);
+        speak(prompt, { rate: 1, pitch: 1.02 });
+        // start listening automatically if mic available and input mode voice
+        setTimeout(() => {
+          if (inputMode === "voice" && recognition) {
+            startListening();
+          } else {
+            showTyping();
+          }
+        }, 700);
+      }
+
+      function startListening() {
+        if (!recognition) {
+          assistantText.innerText =
+            "Microphone not supported. Switch to keyboard input.";
+          showTyping();
+          return;
+        }
+        if (listening) {
+          stopListening();
+          return;
+        }
+        try {
+          recognition.start();
+          // flip label
+          micLabel.innerText = "Listening...";
+        } catch (e) {
+          console.warn("start err", e);
+          recognition.stop();
+        }
+      }
+
+      function stopListening() {
+        if (!recognition) return;
+        try {
+          recognition.stop();
+        } catch (e) {}
+        micLabel.innerText = "Start Mic";
+        listening = false;
+      }
+
+      micBtn.addEventListener("click", () => {
+        if (inputMode !== "voice") {
+          inputMode = "voice";
+          hideTyping();
+        }
+        if (!recognition) {
+          alert(
+            "Speech recognition not supported in this browser. Use keyboard input."
+          );
+          return;
+        }
+        if (listening) stopListening();
+        else startListening();
+      });
+
+      function toggleInputMode() {
+        if (inputMode === "voice") {
+          inputMode = "text";
+          showTyping();
+        } else {
+          inputMode = "voice";
+          hideTyping();
+        }
+        toggleInput.innerText =
+          inputMode === "voice" ? "Use keyboard" : "Use voice";
+      }
+
+      /* -------------------------
+   Fluency timer & UI
+   ------------------------- */
+      function startFluencyTimer() {
+        clearInterval(fluencyTimer);
+        fluencySeconds = 0;
+        fluencyTimerEl.innerText = "0s";
+        fluencyTimer = setInterval(() => {
+          fluencySeconds++;
+          fluencyTimerEl.innerText = fluencySeconds + "s";
+        }, 1000);
+      }
+      function stopFluencyTimer() {
+        if (fluencyTimer) clearInterval(fluencyTimer);
+      }
+
+      /* -------------------------
+   Confidence UI
+   ------------------------- */
+      function updateConfidenceUI() {
+        confidenceBar.style.width = Math.min(100, confidence) + "%";
+        confidenceText.innerText = confidence
+          ? `Smoothness: ${confidence}%`
+          : "Smoothness: N/A";
+      }
+
+      /* -------------------------
+   Submit reply (typed or final voice result)
+   ------------------------- */
+      function submitTyped() {
+        const text = typeInput.value.trim();
+        if (!text) {
+          alert("Type something or use the mic");
+          return;
+        }
+        // simulate final voice result
+        sessionTranscript = text;
+        // rudimentary confidence for typed: derive from length
+        confidence = Math.min(
+          95,
+          Math.round(Math.min(1, text.length / 60) * 100)
+        );
+        updateConfidenceUI();
+        processReply(sessionTranscript);
+        typeInput.value = "";
+      }
+
+      function processReply(transcript) {
+        // Evaluate: check minimum fluency (>=5s) OR typed long enough (>=6 words)
+        const sufficientTime = fluencySeconds >= 5;
+        const words = transcript.trim().split(/\s+/).filter(Boolean).length;
+        const sufficientWords = words >= 6;
+        // politeness bonus detection
+        const polish = detectPoliteness(transcript);
+        // hesitations penalty
+        const hesitations = (
+          transcript.toLowerCase().match(/\b(um|uh|er|ah)\b/g) || []
+        ).length;
+        // score this prompt as correct if (sufficientTime or sufficientWords) and not too many hesitations
+        const correct = (sufficientTime || sufficientWords) && hesitations <= 3;
+        // increase confidence a little if polite
+        if (polish) confidence = Math.min(100, confidence + 6);
+        updateConfidenceUI();
+
+        // record history
+        historyAdd(
+          "user",
+          transcript + (inputMode === "text" ? " (typed)" : "")
+        );
+        // give feedback and move on or consume retry
+        if (correct) {
+          correctCount++;
+          assistantText.innerText =
+            "Assistant: Good — that was clear. Follow-up:";
+          historyAdd("assistant", "Good — that was clear.");
+          // small xp ack visual
+          flashBoatUp();
+          promptIndex++;
+          // short delay to speak next assistant prompt
+          setTimeout(() => speakAndPrompt(), 1000);
+        } else {
+          attemptsLeft = Math.max(0, attemptsLeft - 1);
+          retriesEl.innerText = attemptsLeft;
+          if (attemptsLeft > 0) {
+            assistantText.innerText =
+              "Assistant: I didn't catch that clearly. Could you repeat or elaborate?";
+            historyAdd(
+              "assistant",
+              "I didn't catch that clearly. Please repeat."
+            );
+            // re-listen
+            if (inputMode === "voice") {
+              setTimeout(() => {
+                if (recognition) recognition.start();
+              }, 400);
+            }
+          } else {
+            assistantText.innerText =
+              "Assistant: Let’s move to the next prompt.";
+            historyAdd("assistant", "Let’s move to the next prompt.");
+            promptIndex++;
+            attemptsLeft = 2;
+            setTimeout(() => speakAndPrompt(), 700);
+          }
+        }
+        // update UI counters
+        levelXpEl.innerText = `${correctCount} / ${
+          LEVELS[currentLevel - 1].prompts.length
+        }`;
+        updateLevelUI();
+        stopFluencyTimer();
+      }
+
+      /* -------------------------
+   Politeness detection (very simple)
+   ------------------------- */
+      function detectPoliteness(text) {
+        const polite = [
+          "please",
+          "could",
+          "would you",
+          "thank you",
+          "excuse me",
+          "pardon",
+        ];
+        const t = text.toLowerCase();
+        return polite.some((p) => t.includes(p));
+      }
+
+      /* -------------------------
+   History UI
+   ------------------------- */
+      function historyAdd(who, text) {
+        const el = document.createElement("div");
+        el.className = "p-2 rounded-md shadow-sm";
+        if (who === "assistant") {
+          el.style.background = "linear-gradient(90deg,#fff,#ecfeff)";
+          el.style.color = "#083344";
+          el.innerHTML = `<strong>Assistant</strong>: ${escapeHtml(text)}`;
+        } else {
+          el.style.background = "#f1f6f6";
+          el.style.color = "#083344";
+          el.innerHTML = `<strong>You</strong>: ${escapeHtml(text)}`;
+        }
+        historyEl.prepend(el);
+      }
+
+      /* -------------------------
+   Finish & scoring
+   ------------------------- */
+      function finishLevel() {
+        // level passes if correctCount >=7 (out of 10)
+        const passed = correctCount >= 7;
+        // update best if improved
+        const prevBest = profile.perLevelBest[currentLevel - 1] || 0;
+        if (passed && correctCount > prevBest) {
+          profile.perLevelBest[currentLevel - 1] = correctCount;
+          // unlock next level
+          if (profile.unlockedLevel < currentLevel)
+            profile.unlockedLevel = currentLevel;
+          saveProfile();
+          renderLevelsList();
+        }
+        // update global xp display
+        globalXpEl.innerText = computeGlobalXP();
+        // show a modal-like summary in assistant area
+        assistantText.innerText = `Level ${currentLevel} complete — Score: ${correctCount} / ${
+          LEVELS[currentLevel - 1].prompts.length
+        } — ${passed ? "Passed" : "Try again to reach 7/10"}`;
+        historyAdd("assistant", assistantText.innerText);
+        // confetti/celebrate if passed
+        if (passed) celebrateLevel();
+        // allow next or retry buttons via history
+        const cont = document.createElement("div");
+        cont.className = "mt-3 flex gap-2";
+        cont.innerHTML = `<button id="retryBtn" class="btn-ghost">Retry</button> ${
+          currentLevel < 10
+            ? '<button id="nextBtn" class="btn-primary">Next Level</button>'
+            : ""
+        } <button id="indexBtn2" class="btn-ghost">Index</button>`;
+        historyEl.prepend(cont);
+        document
+          .getElementById("retryBtn")
+          .addEventListener("click", () => startLevel(currentLevel));
+        if (currentLevel < 10)
+          document.getElementById("nextBtn").addEventListener("click", () => {
+            if (!passed) {
+              alert("Reach at least 7/10 to unlock next level");
+              return;
+            }
+            startLevel(currentLevel + 1);
+          });
+        document
+          .getElementById("indexBtn2")
+          .addEventListener(
+            "click",
+            () => (window.location.href = "ocean-index.html")
+          );
+      }
+
+      /* -------------------------
+   Boat / visuals / feedback
+   ------------------------- */
+      function computeGlobalXP() {
+        return (profile.perLevelBest || []).reduce((a, b) => a + b, 0);
+      }
+      function flashBoatUp() {
+        // visually raise boat container a bit and add glow
+        const bc = document.getElementById("boatContainer");
+        const boat = document.getElementById("boat");
+        const prev = parseFloat(bc.style.bottom) || 12;
+        const newBottom = Math.min(60, prev + 4);
+        bc.style.bottom = newBottom + "px";
+        boat.classList.add("glow");
+        setTimeout(() => boat.classList.remove("glow"), 800);
+      }
+      function updateBoat() {
+        // map total xp (0..100) to left position and bottom
+        const total = computeGlobalXP();
+        const percent = Math.min(100, Math.round((total / 100) * 100));
+        const bc = document.getElementById("boatContainer");
+        const leftPercent = 6 + (percent / 100) * 72;
+        bc.style.left = leftPercent + "%";
+        const bottom = 12 + (percent / 100) * 44;
+        bc.style.bottom = bottom + "px";
+      }
+
+      /* -------------------------
+   Celebrations
+   ------------------------- */
+      function celebrateLevel() {
+        for (let i = 0; i < 16; i++) {
+          const em = document.createElement("div");
+          em.style.position = "fixed";
+          em.style.left = 20 + Math.random() * 60 + "%";
+          em.style.top = 10 + Math.random() * 30 + "%";
+          em.style.pointerEvents = "none";
+          em.style.fontSize = 12 + Math.random() * 26 + "px";
+          em.innerText = ["🎉", "🌊", "⛵", "🚀"][
+            Math.floor(Math.random() * 4)
+          ];
+          document.body.appendChild(em);
+          em.animate(
+            [
+              { transform: "translateY(0) scale(1)" },
+              { transform: "translateY(380px) scale(.6)" },
+            ],
+            {
+              duration: 3500 + Math.random() * 1500,
+              easing: "cubic-bezier(.2,.9,.2,1)",
+            }
+          );
+          setTimeout(() => em.remove(), 5200);
+        }
+      }
+
+      /* -------------------------
+   Simple AI reply (for follow-up): generate assistant follow-up from user reply
+   ------------------------- */
+      function generateFollowup(userText) {
+        const u = userText.toLowerCase();
+        if (
+          u.includes("where") ||
+          u.includes("how") ||
+          u.includes("station") ||
+          u.includes("direc")
+        )
+          return "Great question. Can you repeat the key detail and ask a follow-up?";
+        if (u.includes("thank"))
+          return "You’re welcome. Would you like another similar prompt?";
+        if (u.includes("why") || u.includes("because"))
+          return "Interesting. Can you expand with an example?";
+        if (u.length < 20) return "Good start — can you add one more detail?";
+        return "Nice response — try to slow slightly and add a follow-up question.";
+      }
+
+      /* -------------------------
+   When recognition returns final result (we handle via onend or manual hook)
+   For browsers that do not provide final event reliably, we let user click Stop or rely on interim text.
+   ------------------------- */
+      if (recognition) {
+        recognition.onresult = (ev) => {
+          let t = "";
+          for (let i = ev.resultIndex; i < ev.results.length; i++) {
+            t += ev.results[i][0].transcript;
+            if (ev.results[i].isFinal) {
+              // when final hypothesis appears, process reply
+              sessionTranscript = t;
+              // update confidence if available
+              const last = ev.results[ev.results.length - 1][0];
+              if (last && typeof last.confidence === "number")
+                confidence = Math.round(last.confidence * 100);
+              else
+                confidence = Math.min(
+                  100,
+                  Math.round(Math.min(1, t.length / 120) * 100)
+                );
+              updateConfidenceUI();
+              // stop recognition briefly
+              try {
+                recognition.stop();
+              } catch (e) {}
+              // small delay to ensure event cycles
+              setTimeout(() => {
+                processReply(sessionTranscript);
+              }, 200);
+            } else {
+              // interim update: show in typing area if needed
+              typeInput.value = t;
+            }
+          }
+        };
+      }
+
+      /* -------------------------
+   Typing UI helpers
+   ------------------------- */
+      function showTyping() {
+        typeInput.classList.remove("hidden");
+        sendText.classList.remove("hidden");
+        inputMode = "text";
+        toggleInput.innerText = "Use voice";
+      }
+      function hideTyping() {
+        typeInput.classList.add("hidden");
+        sendText.classList.add("hidden");
+        inputMode = "voice";
+        toggleInput.innerText = "Use keyboard";
+      }
+
+      /* -------------------------
+   Toggle mic convenience: clicking mic toggles recognition
+   ------------------------- */
+      if (recognition) {
+        micBtn.addEventListener("click", () => {
+          if (inputMode !== "voice") {
+            hideTyping();
+            inputMode = "voice";
+            toggleInput.innerText = "Use keyboard";
+          }
+          if (listening) {
+            try {
+              recognition.stop();
+            } catch (e) {}
+          } else {
+            try {
+              recognition.start();
+            } catch (e) {
+              console.warn("start", e);
+            }
+          }
+        });
+      } else {
+        micBtn.addEventListener("click", () =>
+          alert("Speech recognition not available. Use keyboard input.")
+        );
+      }
+
+      /* -------------------------
+   Hints
+   ------------------------- */
+      function showHint() {
+        const lv = LEVELS[currentLevel - 1];
+        if (!lv) {
+          alert("Select a level");
+          return;
+        }
+        const prompt = lv.prompts[promptIndex] || lv.prompts[0];
+        alert(
+          'Hint: Use polite phrases, add a follow-up question, and speak for at least 5 seconds. Example start: "' +
+            prompt.split(" ")[0] +
+            '..."'
+        );
+      }
+
+      /* -------------------------
+   Util: escape
+   ------------------------- */
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      /* -------------------------
+   Init: determine starting level based on ?level param and unlocks
+   ------------------------- */
+      (function init() {
+        // pick level from query param if unlocked
+        const qp = new URLSearchParams(location.search).get("level");
+        const desired = qp ? Math.max(1, Math.min(10, parseInt(qp))) : 1;
+        const mountainOk = mountainUnlocked();
+
+        if (!mountainOk) {
+          // Render levels disabled but allow viewing
+          profile = profile || loadProfile();
+          // set unlockedLevel to -1 to make all locked visually
+          profile.unlockedLevel = -1;
+          renderLevelsList();
+          // show notice
+          assistantText.innerText =
+            "Ocean region locked — complete Mountain region (70% XP) to enable speaking levels. You can still view content.";
+          // set current level to 1 but disable starting until unlocked
+          currentLevel = desired;
+          currentLevelTitle.innerText = `Level ${currentLevel} — ${
+            LEVELS[currentLevel - 1].title
+          }`;
+          currentLevelSubtitle.innerText =
+            "Locked until Mountain region cleared";
+          return;
+        }
+
+        // else allow playing: set unlocked levels from profile
+        profile = loadProfile();
+        if (typeof profile.unlockedLevel !== "number")
+          profile.unlockedLevel = 0;
+        // if level param provided ensure it's not beyond unlocked+1
+        if (desired <= profile.unlockedLevel + 1) startLevel(desired);
+        else startLevel(profile.unlockedLevel + 1);
+        renderLevelsList();
+      })();
+    </script>
+  </body>
+</html>

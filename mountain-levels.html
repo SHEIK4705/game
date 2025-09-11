@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>🏔 Mountain Quest — Level Play</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg1: #071f16;
+        --panel: rgba(10, 45, 34, 0.92);
+        --accent: #34d399;
+        --soft: #a7f3d0;
+      }
+      html, body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Quicksand, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        /* background: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80") no-repeat center center/cover; */
+        background-image: url(./mountain.jpg);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat; 
+        background-attachment: fixed;
+        color: #e6fff4;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        position: relative;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 18px auto;
+        padding: 18px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(2, 6, 23, 0.36);
+      }
+      .glass {
+        background: linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 18px;
+        box-shadow: 0 10px 40px rgba(2, 6, 23, 0.32);
+      }
+      .title {
+        font-family: "Press Start 2P", cursive;
+        color: var(--soft);
+        text-shadow: 0 6px 18px rgba(16,185,129,0.18);
+        letter-spacing: 2px;
+      }
+      .btn-primary {
+        background: linear-gradient(90deg, var(--accent), #16a34a);
+        color: #04251f;
+        font-weight: 800;
+        padding: 10px 14px;
+        border-radius: 12px;
+        transition: background 0.2s;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(90deg, #16a34a, var(--accent));
+      }
+      .btn-ghost {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: var(--soft);
+        padding: 8px 12px;
+        border-radius: 10px;
+        transition: background 0.2s;
+      }
+      .btn-ghost:hover {
+        background: rgba(34,197,94,0.08);
+      }
+      .option {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        padding: 10px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.12s, box-shadow 0.12s;
+      }
+      .option:hover {
+        transform: translateY(-4px) scale(1.04);
+        box-shadow: 0 10px 30px rgba(34,197,94,0.18);
+      }
+      .disabled {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+      .meter {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.09);
+        overflow: hidden;
+      }
+      .meter > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #86efac, #16a34a);
+        width: 0%;
+        transition: width 0.3s;
+      }
+      .small {
+        font-size: 13px;
+        color: rgba(255,255,255,0.85);
+      }
+      .kbd {
+        background: rgba(255,255,255,0.09);
+        padding: 6px 8px;
+        border-radius: 6px;
+        font-weight: 800;
+        color: var(--soft);
+      }
+      .rise-effect {
+        animation: rise 0.9s ease both;
+      }
+      @keyframes rise {
+        from { transform: translateY(16px); opacity: 0;}
+        to { transform: translateY(0); opacity: 1;}
+      }
+      .firefly {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: radial-gradient(circle, #d9fff1, #34d399);
+        opacity: 0.7;
+        pointer-events: none;
+        filter: blur(0.2px);
+        animation: fly 7s linear infinite;
+      }
+      @keyframes fly {
+        0% { transform: translateY(0) scale(1);}
+        50% { transform: translateY(-24px) scale(1.2);}
+        100% { transform: translateY(0) scale(1);}
+      }
+      .center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .monospace {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      }
+      .shadow-soft {
+        box-shadow: 0 10px 30px rgba(2,6,23,0.28);
+      }
+      .note {
+        font-size: 13px;
+        color: #c6ffe7;
+      }
+      .xp-gain {
+        animation: xpGain 0.8s ease;
+      }
+      @keyframes xpGain {
+        0% { transform: scale(1); color: #e6fff4;}
+        50% { transform: scale(1.3); color: #fbbf24;}
+        100% { transform: scale(1); color: #e6fff4;}
+      }
+      .correct-flash {
+        animation: correctFlash 0.5s ease;
+      }
+      @keyframes correctFlash {
+        0% { background-color: rgba(34,197,94,0.2);}
+        50% { background-color: rgba(34,197,94,0.5);}
+        100% { background-color: rgba(34,197,94,0.2);}
+      }
+      .wrong-flash {
+        animation: wrongFlash 0.5s ease;
+      }
+      @keyframes wrongFlash {
+        0% { background-color: rgba(239,68,68,0.2);}
+        50% { background-color: rgba(239,68,68,0.5);}
+        100% { background-color: rgba(239,68,68,0.2);}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="glass p-4 mb-6">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4"></div>
+          <div>
+            <div class="title text-xl">🏔 Mountain Quest</div>
+            <div class="small">Pronunciation & Confidence — Region 4</div>
+          </div>
+          <div class="flex flex-col sm:flex-row items-start justify-between sm:items-center gap-2 sm:gap-3 mt-3 md:mt-0">
+            <!-- <div class="small">
+              Region: <strong id="regionLabel">Mountain</strong>
+            </div> -->
+            <div class="small">
+              Total XP: <strong id="profileXP">0</strong>
+            </div>
+            <div class="small">
+              Unlocked: <strong id="unlockedLabel">Level 1</strong>
+            </div>
+            <button id="back" class="btn-ghost mt-2 sm:mt-0">⟵ Back</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main layout -->
+      <div class="grid md:grid-cols-3 gap-6 max-w-7xl m-auto">
+        <!-- Left: Level list -->
+        <aside class="hidden xl:block p-4 shadow-soft m-auto w-full" style="background-color: rgba(0, 0, 0, 0.5);">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-center mb-3">
+            <div class="font-bold">Mountain Levels</div>
+            <div class="small">
+              Each level = 40 XP (4 per task). Master = 70 XP
+            </div>
+          </div>
+
+          <div id="levelList" class="space-y-3 max-h-[68vh] pr-2 overflow-y-scroll">
+            <!-- will populate -->
+          </div>
+
+          <div class="mt-5">
+            <div class="font-bold small mb-2">Profile</div>
+            <div class="flex items-center gap-2">
+              <div class="btn-ghost small">
+                Stars: <span id="profileStars">0</span>
+              </div>
+              <div class="btn-ghost small">
+                Streak: <span id="profileStreak">0</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Middle: Play area -->
+        <section class="col-span-2 glass p-5 mx-auto shadow-soft" style="background-color: rgba(0, 0, 0, 0.5);">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="lg:col-span-2">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="font-bold text-lg" id="levelTitle">
+                    Level 1 — Basic Word Pronunciation
+                  </div>
+                  <div class="small text-green-100 mt-1" id="levelSubtitle">
+                    Listen and repeat single words.
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="small">
+                    Run XP: <strong id="runXP">0</strong> /
+                    <span id="goalXP">40</span>
+                  </div>
+                  <div class="meter w-48 mt-2">
+                    <span id="runBar" style="width: 0%"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="mt-6 p-4 bg-gradient-to-b from-black/10 to-black/5 rounded-lg"
+              >
+              <div
+                id="promptArea"
+                class="min-h-[160px] flex flex-col justify-center gap-3"
+              >
+                <!-- question prompt inserted here -->
+                <div id="textInputContainer" class="mt-3 hidden">
+                  <input id="textInput" type="text" placeholder="Type your answer here (fallback for mic)" class="w-full p-2 rounded bg-white/10 text-white placeholder-green-300 border border-green-500">
+                </div>
+              </div>
+              </div>
+
+              <div class="mt-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="note">
+                    Attempts left: <strong id="attemptsLeft">3</strong>
+                  </div>
+                  <div class="note">
+                    Question: <strong id="questionIndex">1</strong>/10
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <button id="skipBtn" class="btn-ghost">Skip</button>
+                  <button id="submitBtn" class="btn-primary">
+                    Submit Answer
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right sidebar: Feedback and controls -->
+            <div>
+              <div class="p-3 bg-black/10 rounded-lg">
+                <div class="font-bold small mb-2">Voice Controls</div>
+                <div class="flex flex-col gap-2">
+                  <button id="micBtn" class="btn-ghost">🎙️ Start Mic</button>
+                  <div class="small text-green-100">
+                    Mic status: <span id="micStatus">off</span>
+                  </div>
+                  <div class="small">
+                    Auto-eval: <span id="autoEval">enabled</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 p-3 bg-black/10 rounded-lg">
+                <div class="font-bold small mb-2">Feedback</div>
+                <div id="feedback" class="small text-green-100 min-h-[120px]">
+                  No feedback yet
+                </div>
+              </div>
+
+              <div class="mt-4 p-3 bg-black/10 rounded-lg">
+                <div class="font-bold small mb-2">Session</div>
+                <div class="flex flex-col gap-2">
+                  <div class="small">
+                    Level run XP: <span id="sessionXp">0</span>
+                  </div>
+                  <div class="small">
+                    Completed Qs: <span id="completedQs">0</span>/10
+                  </div>
+                  <button id="finishRun" class="btn-primary">Finish Run</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- End panel (Update / Ignore) -->
+          <div id="endPanel" class="mt-6 p-4 bg-black/6 rounded-lg hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg" id="endTitle">Level Summary</div>
+                <div class="small text-green-100" id="endSubtitle">
+                  Review & update score
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="small">Run XP: <span id="endXP">0</span></div>
+                <div class="small">Status: <span id="endStatus">-</span></div>
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="md:col-span-2">
+                <div
+                  id="summaryList"
+                  class="small text-green-100 max-h-[180px] overflow-auto"
+                ></div>
+              </div>
+              <div class="flex flex-col gap-2 items-end">
+                <button id="updateBtn" class="btn-primary w-full">
+                  Update Score
+                </button>
+                <button id="ignoreBtn" class="btn-ghost w-full">
+                  Ignore Score
+                </button>
+                <button id="retryBtn" class="btn-ghost w-full">
+                  Retry Level
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Minimal helper UI / hidden elements -->
+
+    <script>
+const PROFILE_KEY = "fqx_mountain_profile_v2";
+function defaultProfile() {
+  return {
+    perLevelBest: Array(10).fill(0),
+    unlockedLevel: 0,
+    oceanUnlocked: false,
+    streak: 0,
+  };
+}
+function loadProfile() {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (!raw) return defaultProfile();
+    const p = JSON.parse(raw);
+    if (!p.perLevelBest || p.perLevelBest.length !== 10)
+      p.perLevelBest = Array(10).fill(0);
+    if (typeof p.unlockedLevel !== "number") p.unlockedLevel = 0;
+    if (typeof p.oceanUnlocked !== "boolean") p.oceanUnlocked = false;
+    if (typeof p.streak !== "number") p.streak = 0;
+    return p;
+  } catch (e) {
+    return defaultProfile();
+  }
+}
+function saveProfile(p) {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+}
+
+// --- Improved Level Bank ---
+const LEVELS_BANK = {
+  1: {
+    title: "Daily Conversation Practice",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "word", prompt: "Greet someone politely.", hint: "Say: Hello, how are you?", evalType: "speechContains", answer: "hello" },
+      { id: 2, type: "word", prompt: "Ask about the weather.", hint: "Say: What's the weather like today?", evalType: "speechContains", answer: "weather" },
+      { id: 3, type: "word", prompt: "Order a coffee.", hint: "Say: I'd like a coffee, please.", evalType: "speechContains", answer: "coffee" },
+      { id: 4, type: "word", prompt: "Thank someone for help.", hint: "Say: Thank you very much!", evalType: "speechContains", answer: "thank you" },
+      { id: 5, type: "word", prompt: "Ask for directions.", hint: "Say: Excuse me, how do I get to the station?", evalType: "speechContains", answer: "station" },
+      { id: 6, type: "word", prompt: "Introduce yourself.", hint: "Say: My name is...", evalType: "speechContains", answer: "name" },
+      { id: 7, type: "word", prompt: "Make a polite request.", hint: "Say: Could you help me, please?", evalType: "speechContains", answer: "help" },
+      { id: 8, type: "word", prompt: "Decline an offer politely.", hint: "Say: No, thank you.", evalType: "speechContains", answer: "no thank you" },
+      { id: 9, type: "word", prompt: "Ask someone to repeat.", hint: "Say: Could you repeat that, please?", evalType: "speechContains", answer: "repeat" },
+      { id: 10, type: "word", prompt: "Say goodbye.", hint: "Say: Goodbye! See you soon.", evalType: "speechContains", answer: "goodbye" },
+    ],
+  },
+  2: {
+    title: "Situational Role Play",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "phrase", prompt: "You lost your wallet. Ask for help.", hint: "Say: I lost my wallet. Can you help me?", evalType: "speechContains", answer: "wallet" },
+      { id: 2, type: "phrase", prompt: "You want to buy a ticket.", hint: "Say: I'd like to buy a ticket.", evalType: "speechContains", answer: "ticket" },
+      { id: 3, type: "phrase", prompt: "You are late for a meeting.", hint: "Say: Sorry, I'm late.", evalType: "speechContains", answer: "sorry" },
+      { id: 4, type: "phrase", prompt: "You need to make a reservation.", hint: "Say: Can I make a reservation for tonight?", evalType: "speechContains", answer: "reservation" },
+      { id: 5, type: "phrase", prompt: "You want to pay the bill.", hint: "Say: Could I get the bill, please?", evalType: "speechContains", answer: "bill" },
+      { id: 6, type: "phrase", prompt: "You want to compliment someone.", hint: "Say: You did a great job!", evalType: "speechContains", answer: "great job" },
+      { id: 7, type: "phrase", prompt: "You want to apologize.", hint: "Say: I'm sorry for the mistake.", evalType: "speechContains", answer: "sorry" },
+      { id: 8, type: "phrase", prompt: "You want to ask for the time.", hint: "Say: What time is it?", evalType: "speechContains", answer: "time" },
+      { id: 9, type: "phrase", prompt: "You want to ask for a menu.", hint: "Say: Could I see the menu, please?", evalType: "speechContains", answer: "menu" },
+      { id: 10, type: "phrase", prompt: "You want to ask for a recommendation.", hint: "Say: What do you recommend?", evalType: "speechContains", answer: "recommend" },
+    ],
+  },
+  3: {
+    title: "Fluency & Pronunciation",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "twister", prompt: "Say: 'The quick brown fox jumps over the lazy dog.'", hint: "Speak clearly and fluently.", evalType: "speechContains", answer: "quick brown fox" },
+      { id: 2, type: "twister", prompt: "Say: 'She sells sea shells by the sea shore.'", hint: "Focus on 'sh' and 's' sounds.", evalType: "speechContains", answer: "sea shells" },
+      { id: 3, type: "twister", prompt: "Say: 'How much wood would a woodchuck chuck if a woodchuck could chuck wood?'", hint: "Try to say it fast and clear.", evalType: "speechContains", answer: "woodchuck" },
+      { id: 4, type: "twister", prompt: "Say: 'Red lorry, yellow lorry.'", hint: "Repeat three times.", evalType: "speechContains", answer: "lorry" },
+      { id: 5, type: "twister", prompt: "Say: 'Unique New York.'", hint: "Repeat three times.", evalType: "speechContains", answer: "unique" },
+      { id: 6, type: "twister", prompt: "Say: 'Irish wristwatch.'", hint: "Repeat three times.", evalType: "speechContains", answer: "wristwatch" },
+      { id: 7, type: "twister", prompt: "Say: 'Toy boat.'", hint: "Repeat three times.", evalType: "speechContains", answer: "toy boat" },
+      { id: 8, type: "twister", prompt: "Say: 'Six slippery snails slid slowly seaward.'", hint: "Focus on 'sl' and 'sn' sounds.", evalType: "speechContains", answer: "slippery snails" },
+      { id: 9, type: "twister", prompt: "Say: 'Fuzzy Wuzzy was a bear.'", hint: "Repeat three times.", evalType: "speechContains", answer: "fuzzy wuzzy" },
+      { id: 10, type: "twister", prompt: "Say: 'Peter Piper picked a peck of pickled peppers.'", hint: "Repeat three times.", evalType: "speechContains", answer: "peter piper" },
+    ],
+  },
+  4: {
+    title: "Real-Life Dialogues",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "dialog", prompt: "AI: Hi! Can you introduce yourself?", hint: "Say your name and where you're from.", evalType: "dialog" },
+      { id: 2, type: "dialog", prompt: "AI: What do you do for work or study?", hint: "Describe your job or studies.", evalType: "dialog" },
+      { id: 3, type: "dialog", prompt: "AI: What do you like to do in your free time?", hint: "Talk about your hobbies.", evalType: "dialog" },
+      { id: 4, type: "dialog", prompt: "AI: Tell me about your favorite food.", hint: "Describe a dish you like.", evalType: "dialog" },
+      { id: 5, type: "dialog", prompt: "AI: What is your favorite place to visit?", hint: "Describe a city or country.", evalType: "dialog" },
+      { id: 6, type: "dialog", prompt: "AI: What are your plans for the weekend?", hint: "Share your weekend plans.", evalType: "dialog" },
+      { id: 7, type: "dialog", prompt: "AI: Tell me about a recent achievement.", hint: "Describe something you accomplished.", evalType: "dialog" },
+      { id: 8, type: "dialog", prompt: "AI: What do you want to improve in English?", hint: "Share your learning goals.", evalType: "dialog" },
+      { id: 9, type: "dialog", prompt: "AI: How do you practice English daily?", hint: "Describe your routine.", evalType: "dialog" },
+      { id: 10, type: "dialog", prompt: "AI: Say goodbye and thank you.", hint: "End the conversation politely.", evalType: "dialog" },
+    ],
+  },
+  5: {
+    title: "Storytelling Challenge",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "story", prompt: "Tell a short story about a mountain adventure.", hint: "Describe what happened and how you felt.", evalType: "speechContains", answer: "mountain" },
+      { id: 2, type: "story", prompt: "Describe a time you helped someone.", hint: "Share details and feelings.", evalType: "speechContains", answer: "helped" },
+      { id: 3, type: "story", prompt: "Tell a story about learning something new.", hint: "Explain the challenge and result.", evalType: "speechContains", answer: "learning" },
+      { id: 4, type: "story", prompt: "Describe a memorable trip.", hint: "Where did you go? What did you do?", evalType: "speechContains", answer: "trip" },
+      { id: 5, type: "story", prompt: "Tell a story about a funny experience.", hint: "Make it entertaining!", evalType: "speechContains", answer: "funny" },
+      { id: 6, type: "story", prompt: "Describe a time you felt proud.", hint: "What did you achieve?", evalType: "speechContains", answer: "proud" },
+      { id: 7, type: "story", prompt: "Tell a story about a challenge you overcame.", hint: "Describe the problem and solution.", evalType: "speechContains", answer: "challenge" },
+      { id: 8, type: "story", prompt: "Describe a favorite childhood memory.", hint: "Share details and emotions.", evalType: "speechContains", answer: "childhood" },
+      { id: 9, type: "story", prompt: "Tell a story about making a new friend.", hint: "How did you meet?", evalType: "speechContains", answer: "friend" },
+      { id: 10, type: "story", prompt: "Describe a time you learned from a mistake.", hint: "What did you learn?", evalType: "speechContains", answer: "mistake" },
+    ],
+  },
+  6: {
+    title: "Expressive Reading",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "express", prompt: "Read with excitement: 'I can't believe it!'", hint: "Show excitement in your voice.", evalType: "speechContains", answer: "can't believe" },
+      { id: 2, type: "express", prompt: "Read with sadness: 'I'm really sorry.'", hint: "Sound genuinely sad.", evalType: "speechContains", answer: "sorry" },
+      { id: 3, type: "express", prompt: "Read with anger: 'Why did you do that?'", hint: "Sound angry but polite.", evalType: "speechContains", answer: "why did you" },
+      { id: 4, type: "express", prompt: "Read with happiness: 'That's wonderful!'", hint: "Sound happy and positive.", evalType: "speechContains", answer: "wonderful" },
+      { id: 5, type: "express", prompt: "Read with surprise: 'Oh! I didn't expect that.'", hint: "Sound surprised.", evalType: "speechContains", answer: "didn't expect" },
+      { id: 6, type: "express", prompt: "Read with calmness: 'Let's take a deep breath.'", hint: "Sound calm and relaxed.", evalType: "speechContains", answer: "deep breath" },
+      { id: 7, type: "express", prompt: "Read with pride: 'I did it myself.'", hint: "Sound proud.", evalType: "speechContains", answer: "did it myself" },
+      { id: 8, type: "express", prompt: "Read with politeness: 'Could you help me, please?'", hint: "Sound polite.", evalType: "speechContains", answer: "help me please" },
+      { id: 9, type: "express", prompt: "Read with relief: 'It's finally over.'", hint: "Sound relieved.", evalType: "speechContains", answer: "finally over" },
+      { id: 10, type: "express", prompt: "Read with curiosity: 'How does this work?'", hint: "Sound curious.", evalType: "speechContains", answer: "how does this" },
+    ],
+  },
+  7: {
+    title: "Advanced Pronunciation",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "pair", prompt: "Say: 'ship' and 'sheep'.", hint: "Focus on vowel sounds.", evalType: "speechContains", answer: ["ship", "sheep"] },
+      { id: 2, type: "pair", prompt: "Say: 'bit' and 'beat'.", hint: "Focus on vowel sounds.", evalType: "speechContains", answer: ["bit", "beat"] },
+      { id: 3, type: "pair", prompt: "Say: 'full' and 'fool'.", hint: "Focus on vowel sounds.", evalType: "speechContains", answer: ["full", "fool"] },
+      { id: 4, type: "pair", prompt: "Say: 'lock' and 'luck'.", hint: "Focus on vowel sounds.", evalType: "speechContains", answer: ["lock", "luck"] },
+      { id: 5, type: "pair", prompt: "Say: 'fan' and 'van'.", hint: "Focus on consonant sounds.", evalType: "speechContains", answer: ["fan", "van"] },
+      { id: 6, type: "pair", prompt: "Say: 'rice' and 'lice'.", hint: "Focus on consonant sounds.", evalType: "speechContains", answer: ["rice", "lice"] },
+      { id: 7, type: "pair", prompt: "Say: 'pen' and 'pan'.", hint: "Focus on vowel sounds.", evalType: "speechContains", answer: ["pen", "pan"] },
+      { id: 8, type: "pair", prompt: "Say: 'fill' and 'feel'.", hint: "Focus on vowel sounds.", evalType: "speechContains", answer: ["fill", "feel"] },
+      { id: 9, type: "pair", prompt: "Say: 'tax' and 'tacks'.", hint: "Focus on ending sounds.", evalType: "speechContains", answer: ["tax", "tacks"] },
+      { id: 10, type: "pair", prompt: "Say: 'bet' and 'bat'.", hint: "Focus on vowel sounds.", evalType: "speechContains", answer: ["bet", "bat"] },
+    ],
+  },
+  8: {
+    title: "Question Intonation",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "intonation", prompt: "Ask: 'Are you coming?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "are you coming" },
+      { id: 2, type: "intonation", prompt: "Ask: 'Do you like coffee?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "do you like coffee" },
+      { id: 3, type: "intonation", prompt: "Ask: 'Will it rain today?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "will it rain today" },
+      { id: 4, type: "intonation", prompt: "Ask: 'Can I help you?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "can i help you" },
+      { id: 5, type: "intonation", prompt: "Ask: 'Is this your bag?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "is this your bag" },
+      { id: 6, type: "intonation", prompt: "Ask: 'Have you been here before?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "have you been here before" },
+      { id: 7, type: "intonation", prompt: "Ask: 'Would you like some tea?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "would you like some tea" },
+      { id: 8, type: "intonation", prompt: "Ask: 'Could you close the door?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "could you close the door" },
+      { id: 9, type: "intonation", prompt: "Ask: 'Shall we start now?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "shall we start now" },
+      { id: 10, type: "intonation", prompt: "Ask: 'Do you understand?'", hint: "Use rising intonation.", evalType: "speechContains", answer: "do you understand" },
+    ],
+  },
+  9: {
+    title: "Syllable Stress Practice",
+    totalXP: 40,
+    perTaskXP: 4,
+    tasks: [
+      { id: 1, type: "stress", prompt: "Say: 'pho-to-graph' (stress on first syllable)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "photograph", correctSyllable: 0 } },
+      { id: 2, type: "stress", prompt: "Say: 'pho-to-gra-phy' (stress on second syllable)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "photography", correctSyllable: 1 } },
+      { id: 3, type: "stress", prompt: "Say: 'PREsent' (noun) vs 'preSENT' (verb)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "present", correctSyllable: 0 } },
+      { id: 4, type: "stress", prompt: "Say: 'REcord' (noun) vs 'reCORD' (verb)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "record", correctSyllable: 0 } },
+      { id: 5, type: "stress", prompt: "Say: 'CONtract' (noun) vs 'conTRACT' (verb)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "contract", correctSyllable: 0 } },
+      { id: 6, type: "stress", prompt: "Say: 'IMport' (noun) vs 'imPORT' (verb)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "import", correctSyllable: 0 } },
+      { id: 7, type: "stress", prompt: "Say: 'DEsert' (noun) vs 'desSERT' (verb)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "desert", correctSyllable: 0 } },
+      { id: 8, type: "stress", prompt: "Say: 'OBject' (noun) vs 'obJECT' (verb)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "object", correctSyllable: 0 } },
+      { id: 9, type: "stress", prompt: "Say: 'CONtrast' (noun) vs 'conTRAST' (verb)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "contrast", correctSyllable: 0 } },
+      { id: 10, type: "stress", prompt: "Say: 'PERmit' (noun) vs 'perMIT' (verb)", hint: "Tap the stressed syllable.", evalType: "manual", meta: { word: "permit", correctSyllable: 0 } },
+    ],
+  },
+  10: {
+    title: "Summit Boss: Fluent Conversation",
+    totalXP: 70,
+    perTaskXP: 7,
+    tasks: [
+      { id: 1, type: "dialog", prompt: "AI: Start a conversation about travel.", hint: "Talk about places you've visited.", evalType: "dialog" },
+      { id: 2, type: "dialog", prompt: "AI: Discuss your favorite hobby.", hint: "Describe what you enjoy doing.", evalType: "dialog" },
+      { id: 3, type: "dialog", prompt: "AI: Share your goals for learning English.", hint: "Explain why you want to improve.", evalType: "dialog" },
+      { id: 4, type: "dialog", prompt: "AI: Tell a story about overcoming a challenge.", hint: "Describe the problem and solution.", evalType: "dialog" },
+      { id: 5, type: "dialog", prompt: "AI: Give advice to someone learning English.", hint: "Share tips and encouragement.", evalType: "dialog" },
+      { id: 6, type: "dialog", prompt: "AI: Describe a memorable experience.", hint: "Share details and emotions.", evalType: "dialog" },
+      { id: 7, type: "dialog", prompt: "AI: Talk about your favorite book or movie.", hint: "Describe the story and why you like it.", evalType: "dialog" },
+      { id: 8, type: "dialog", prompt: "AI: Explain how you practice English daily.", hint: "Share your routine.", evalType: "dialog" },
+      { id: 9, type: "dialog", prompt: "AI: End the conversation politely.", hint: "Say goodbye and thank you.", evalType: "dialog" },
+      { id: 10, type: "dialog", prompt: "AI: Reflect on your progress.", hint: "Talk about what you've learned.", evalType: "dialog" },
+    ],
+  },
+};
+
+// --- The rest of your code (UI, event handlers, mic, etc.) remains unchanged ---
+      /* Mountain Levels — Full logic
+   - 10 levels (1..9 standard, 10 master)
+   - Each level has 10 tasks (10 questions)
+   - Levels 1..9: 10 tasks x 4 XP = 40 XP each
+     unlock next level requires >= 28 XP committed
+   - Level 10 (Master): 10 tasks with higher XP per task; total 70 XP if success
+   - Each question: 3 attempts (2 retries) before moving on (no XP)
+   - At run end: show summary with Update Score and Ignore Score
+   - Update Score commits to profile (per-level best only if higher) to avoid duplicates
+   - Speech detection uses Web Speech API where available; falls back to manual acceptance
+   - Keep UI responsive and interactive
+*/
+
+      
+
+      // ------------------------------ Level bank (tasks) ------------------------------
+      /* Each level array contains 10 question objects.
+   question schema:
+   {
+     id: number,
+     type: 'word'|'stress'|'pair'|'twister'|'rhythm'|'intonation'|'express'|'phrase'|'story'|'dialog'|'custom',
+     prompt: string,
+     hint?: string,
+     answer?: string or array depending on type,
+     evalType?: 'speechContains'|'exact'|'similar'|'manual' // how to auto-evaluate
+     meta?: any // extra info like syllable index for stress etc.
+   }
+*/
+
+      // NOTE: many prompts are concise to keep code readable; these cover all 10 questions per level.
+
+     
+      // ------------------------------ App state ------------------------------
+      let profile = loadProfile();
+      let currentLevelIndex =
+        profile.unlockedLevel <= 9 ? profile.unlockedLevel : 0; // 0-based index
+      // If ?level param present, allow jump to unlocked only
+      const urlParams = new URLSearchParams(window.location.search);
+      const levelParam = parseInt(urlParams.get("level"), 10);
+      if (Number.isFinite(levelParam) && levelParam >= 1 && levelParam <= 10) {
+        if (levelParam - 1 <= profile.unlockedLevel)
+          currentLevelIndex = levelParam - 1;
+      }
+
+      // runtime for run
+      let run = {
+        level: currentLevelIndex + 1,
+        tasks: [],
+        currentQ: 0,
+        attemptsLeft: 3,
+        runXp: 0,
+        results: [], // {correct:boolean, attemptsUsed:number, note:string}
+        completed: false,
+      };
+
+      // speech recognition
+      let recognition = null;
+      let micOn = false;
+      let lastTranscript = "";
+
+      // DOM refs
+      const levelListEl = document.getElementById("levelList");
+      const profileXP = document.getElementById("profileXP");
+      const unlockedLabel = document.getElementById("unlockedLabel");
+      const levelTitle = document.getElementById("levelTitle");
+      const levelSubtitle = document.getElementById("levelSubtitle");
+      const promptArea = document.getElementById("promptArea");
+      const attemptsLeftEl = document.getElementById("attemptsLeft");
+      const questionIndexEl = document.getElementById("questionIndex");
+      const sessionXpEl = document.getElementById("sessionXp");
+      const completedQsEl = document.getElementById("completedQs");
+      const runBar = document.getElementById("runBar");
+      const runXpEl = document.getElementById("runXP");
+      const goalXpEl = document.getElementById("goalXP");
+      const feedbackEl = document.getElementById("feedback");
+      const endPanel = document.getElementById("endPanel");
+      const summaryList = document.getElementById("summaryList");
+      const endXP = document.getElementById("endXP");
+      const endStatus = document.getElementById("endStatus");
+      const updateBtn = document.getElementById("updateBtn");
+      const ignoreBtn = document.getElementById("ignoreBtn");
+      const retryBtn = document.getElementById("retryBtn");
+      const micBtn = document.getElementById("micBtn");
+      const micStatus = document.getElementById("micStatus");
+      const autoEvalLabel = document.getElementById("autoEval");
+      const submitBtn = document.getElementById("submitBtn");
+      const skipBtn = document.getElementById("skipBtn");
+      const finishRunBtn = document.getElementById("finishRun");
+      const backBtn = document.getElementById("back");
+
+      backBtn.addEventListener("click", () => {
+        window.location.href = "mountain-index.html";
+      });
+
+      // ------------------------------ Initialize UI ------------------------------
+      function initUI() {
+        buildLevelList();
+        renderProfile();
+        startLevel(run.level);
+        setupSpeech();
+        bindControls();
+        placeFireflies();
+      }
+      function buildLevelList() {
+        levelListEl.innerHTML = "";
+        for (let i = 1; i <= 10; i++) {
+          const li = document.createElement("div");
+          li.className = "p-3 glass flex items-center justify-between";
+          const title = LEVELS_BANK[i].title;
+          const best = profile.perLevelBest[i - 1] || 0;
+          const locked = i - 1 > profile.unlockedLevel;
+          li.innerHTML = `
+      <div>
+        <div class="font-bold">${i}. ${escapeHtml(title)}</div>
+        <div class="small">Best: <strong>${best}</strong> XP</div>
+      </div>
+      <div class="text-sm">
+        ${
+          locked
+            ? '<div class="small">Locked</div>'
+            : `<button class="btn-ghost" data-level="${i}">Play</button>`
+        }
+      </div>
+    `;
+          levelListEl.appendChild(li);
+        }
+        levelListEl.querySelectorAll("button[data-level]").forEach((b) => {
+          b.addEventListener("click", (e) => {
+            const lv = parseInt(e.currentTarget.dataset.level, 10);
+            if (lv - 1 <= profile.unlockedLevel) {
+              startLevel(lv);
+            } else {
+              showFeedback("Level locked. Achieve required XP to unlock.");
+            }
+          });
+        });
+      }
+
+      function renderProfile() {
+        profileXP.textContent = totalProfileXP();
+        unlockedLabel.textContent = `Level ${profile.unlockedLevel + 1}`;
+        document.getElementById("profileStars").textContent =
+          computeStars(profile);
+        document.getElementById("profileStreak").textContent =
+          profile.streak || 0;
+      }
+
+      // ------------------------------ Utility ------------------------------
+      function totalProfileXP() {
+        return profile.perLevelBest.reduce((a, b) => a + b, 0);
+      }
+      function computeStars(p) {
+        // simple conversion: each level best >=28 -> 1 star, >=35 -> 2, >=40 -> 3 (rough)
+        let s = 0;
+        p.perLevelBest.forEach((x) => {
+          if (x >= 40) s += 3;
+          else if (x >= 35) s += 2;
+          else if (x >= 28) s += 1;
+        });
+        return s;
+      }
+
+      function escapeHtml(s) {
+        if (!s) return "";
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+      function showFeedback(msg) {
+        feedbackEl.innerHTML = msg;
+      }
+
+      // ------------------------------ Level run control ------------------------------
+      function startLevel(lvNumber) {
+        // reset run
+        run.level = lvNumber;
+        run.currentQ = 0;
+        run.attemptsLeft = 3;
+        run.runXp = 0;
+        run.results = [];
+        run.completed = false;
+
+        // load tasks shallow copy
+        const bank = LEVELS_BANK[lvNumber];
+        run.tasks = JSON.parse(JSON.stringify(bank.tasks || []));
+        // For master level, tasks already dialog type
+        // show UI info
+        levelTitle.textContent = `${lvNumber} — ${bank.title}`;
+        levelSubtitle.textContent = bank.title;
+        goalXpEl.textContent = bank.totalXP;
+        sessionXpEl.textContent = 0;
+        completedQsEl.textContent = 0;
+        runXpEl.textContent = 0;
+        runBar.style.width = "0%";
+        attemptsLeftEl.textContent = run.attemptsLeft;
+        questionIndexEl.textContent = run.currentQ + 1;
+
+        // hide end panel
+        endPanel.classList.add("hidden");
+        summaryList.innerHTML = "";
+        endXP.textContent = "0";
+        endStatus.textContent = "-";
+
+        // render first question
+        renderQuestion();
+      }
+
+      // render current question UI
+      function renderQuestion() {
+        const bank = LEVELS_BANK[run.level];
+        const totalQ = run.tasks.length;
+        if (run.currentQ >= totalQ) {
+          finishRun();
+          return;
+        }
+        const q = run.tasks[run.currentQ];
+        // display prompt
+        let html = `<div class="text-lg font-bold text-green-100">${escapeHtml(
+          q.prompt
+        )}</div>`;
+        if (q.hint)
+          html += `<div class="small mt-1">Hint: ${escapeHtml(q.hint)}</div>`;
+
+        // depending on q.type build UI
+        if (
+          q.type === "word" ||
+          q.type === "pair" ||
+          q.type === "twister" ||
+          q.type === "rhythm" ||
+          q.type === "intonation" ||
+          q.type === "express" ||
+          q.type === "phrase" ||
+          q.type === "story"
+        ) {
+          html += `<div class="mt-3 small">Listen carefully, then press 🎙️ and speak. Or type in the box below and submit.</div>`;
+          html += `<div class="mt-3 center"><button id="playPrompt" class="btn-ghost">🔊 Play Prompt</button></div>`;
+          html += `<div class="mt-3 small">You can repeat up to <strong>3</strong> times before moving on.</div>`;
+          html += `<div id="textInputContainer" class="mt-3"><input id="textInput" type="text" placeholder="Type your answer here (fallback for mic)" class="w-full p-2 rounded bg-white/10 text-white placeholder-green-300 border border-green-500"></div>`;
+          // document.getElementById('textInputContainer').classList.remove('hidden');
+
+        } else if (q.type === "stress") {
+          // document.getElementById('textInputContainer').classList.add('hidden');
+          // Provide a simple interactive stress selector for user to choose the stressed syllable
+          const word = q.meta && q.meta.word ? q.meta.word : "word";
+          html += `<div class="mt-3 small">Tap the syllable you think is stressed.</div>`;
+          // naive syllable split by hyphen in prompt if provided, otherwise automatic split by vowel groups (simple)
+          let syllables = [];
+          if (q.prompt && q.prompt.includes("-")) {
+            syllables = q.prompt.split(/[ ,]+/).map((s) => s.trim());
+            // flatten hyphenated tokens like "pho-to-graph"
+            syllables = syllables.flatMap((t) => t.split("-"));
+          } else {
+            // fallback: split into 2-3 parts
+            const w = word;
+            const mid = Math.ceil(w.length / 3);
+            syllables = [
+              w.slice(0, mid),
+              w.slice(mid, mid * 2),
+              w.slice(mid * 2),
+            ];
+            syllables = syllables.filter(Boolean);
+          }
+          html += `<div class="mt-3 grid grid-cols-${Math.min(
+            4,
+            syllables.length
+          )} gap-2">`;
+          syllables.forEach((s, i) => {
+            html += `<button class="option stressToken" data-idx="${i}">${escapeHtml(
+              s
+            )}</button>`;
+          });
+          html += `</div>`;
+        } else if (q.type === "dialog") {
+          // Master dialog: show AI line and require user reply in mic; iterative
+          html += `<div class="mt-3 small">This is a dialog task. You will converse with the AI for 4-5 exchanges. Press 🔊 to hear AI and speak to reply.</div>`;
+          html += `<div class="mt-3 center"><button id="startDialog" class="btn-ghost">Start Dialog</button></div>`;
+        } else if (q.type === "text") {
+          html += `<div class="mt-3"><input id="textAnswer" class="w-full p-2 rounded bg-white/5 text-black" placeholder="Type exact phrase (lowercase)"/></div>`;
+        } else {
+          html += `<div class="mt-3 small">Interactive task. Use mic or manual input.</div>`;
+        }
+
+        promptArea.innerHTML = html;
+
+        // attach handlers
+        const playBtn = document.getElementById("playPrompt");
+        if (playBtn) {
+          playBtn.addEventListener("click", () => {
+            speakPrompt(q);
+          });
+          // auto play once
+          setTimeout(() => speakPrompt(q), 350);
+        }
+
+        // stress tokens
+        document.querySelectorAll(".stressToken").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            if (run.completed) return;
+            const idx = parseInt(e.currentTarget.dataset.idx, 10);
+            handleStressSelection(idx);
+          });
+        });
+
+        // start dialog
+        const startDialogBtn = document.getElementById("startDialog");
+        if (startDialogBtn) {
+          startDialogBtn.addEventListener("click", () => {
+            startDialogFlow(q);
+          });
+        }
+
+        // text input
+        const tinput = document.getElementById("textAnswer");
+        if (tinput) {
+          tinput.addEventListener("input", () => {
+            // enable submit
+            enableSubmit(true);
+          });
+        }
+
+        // update UI counters
+        attemptsLeftEl.textContent = run.attemptsLeft;
+        questionIndexEl.textContent = run.currentQ + 1;
+        sessionXpEl.textContent = run.runXp;
+        completedQsEl.textContent = run.results.filter(
+          (r) => r !== null
+        ).length;
+        runXpEl.textContent = run.runXp;
+        const percent = Math.round(
+          (run.runXp / (LEVELS_BANK[run.level].totalXP || 1)) * 100
+        );
+        runBar.style.width = `${Math.min(100, percent)}%`;
+        enableSubmit(false);
+        showFeedback(
+          "Speak when ready or use manual submission if mic unavailable."
+        );
+      }
+
+      // speak the prompt using speechSynthesis
+      function speakPrompt(q) {
+        try {
+          let text = q.prompt;
+          if (q.type === "pair" && Array.isArray(q.answer)) text = q.prompt; // keep as displayed
+          if (q.type === "twister") text = q.prompt;
+          if (q.type === "dialog") text = q.prompt;
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = "en-US";
+          u.rate = 1;
+          u.pitch = 1;
+          speechSynthesis.cancel();
+          speechSynthesis.speak(u);
+        } catch (e) {
+          console.warn("TTS failed", e);
+        }
+      }
+
+      // ------------------------------ Mic & Speech Recognition ------------------------------
+      function setupSpeech() {
+        micStatus.textContent = micOn ? "on" : "off";
+        try {
+          const SpeechRecognition =
+            window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (!SpeechRecognition) {
+            autoEvalLabel.textContent = "text input only";
+            micBtn.textContent = "🎙️ Mic (not supported)";
+            document.getElementById('textInputContainer').classList.remove('hidden');
+            showFeedback("Mic not supported. Use text input.");
+            return;
+          }
+          recognition = new SpeechRecognition();
+          recognition.lang = "en-US";
+          recognition.interimResults = false;
+          recognition.maxAlternatives = 1;
+          recognition.continuous = false;
+
+          recognition.onstart = () => {
+            micOn = true;
+            micStatus.textContent = "listening";
+            micBtn.textContent = "🎙️ Stop Mic";
+            showFeedback("Mic is listening. Speak now!");
+          };
+          recognition.onend = () => {
+            micOn = false;
+            micStatus.textContent = "idle";
+            micBtn.textContent = "🎙️ Start Mic";
+            showFeedback("Mic stopped. Press again to retry.");
+          };
+          recognition.onerror = (e) => {
+            micOn = false;
+            micStatus.textContent = "error";
+            micBtn.textContent = "🎙️ Start Mic";
+            showFeedback("Mic error. Try again or use text input.");
+          };
+
+          recognition.onresult = (ev) => {
+            const t = ev.results[0][0].transcript || "";
+            lastTranscript = t;
+            showFeedback(`Heard: “${escapeHtml(t)}”`);
+            autoEvaluateSpeech(t);
+          };
+        } catch (e) {
+          autoEvalLabel.textContent = "text input only";
+          document.getElementById('textInputContainer').classList.remove('hidden');
+          showFeedback("Mic not supported. Use text input.");
+        }
+      }
+
+      micBtn.addEventListener("click", () => {
+        if (!recognition) {
+          showFeedback("Speech recognition not supported in this browser.");
+          return;
+        }
+        if (micOn) {
+          recognition.stop();
+        } else {
+          try {
+            recognition.start();
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+      });
+
+      // manual speech evaluation fallback: tries to compare transcript to expected answer
+      function autoEvaluateSpeech(transcript) {
+        const q = run.tasks[run.currentQ];
+        if (!q) return;
+        const norm = transcript
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, "")
+          .trim();
+        let expected = "";
+        if (q.evalType === "speechContains") {
+          expected = (q.answer || "").toLowerCase();
+          // if expected is array (for pairs), check any token present
+          if (Array.isArray(q.answer)) {
+            const found = q.answer.some((a) => norm.includes(a.toLowerCase()));
+            if (found) {
+              registerCorrect(`Matched word in transcript`);
+            } else {
+              registerWrong();
+            }
+            return;
+          }
+          if (expected && norm.includes(expected)) {
+            registerCorrect("Matched expected word in speech");
+          } else {
+            // tolerate near matches: check Levenshtein distance or token overlap simple
+            const tokens = norm.split(/\s+/);
+            if (tokens.some((t) => expected.includes(t) && t.length > 2)) {
+              registerCorrect("Partial match in speech");
+            } else {
+              registerWrong();
+            }
+          }
+        } else if (q.evalType === "dialog") {
+          // For dialog, we accept any reasonable reply and mark correct if user spoke multiple words
+          const words = norm.split(/\s+/).filter(Boolean);
+          if (words.length >= 2) {
+            registerCorrect("Dialog reply accepted");
+          } else {
+            registerWrong();
+          }
+        } else if (q.evalType === "manual") {
+          // manual tasks require user action (e.g., stress tokens) — do nothing here
+          showFeedback(
+            "This task is manual. Please select the correct option."
+          );
+        } else if (q.evalType === "exact") {
+          expected = (q.answer || "").toLowerCase();
+          if (norm === expected) registerCorrect("Exact match");
+          else registerWrong();
+        } else {
+          registerWrong();
+        }
+      }
+
+      // register correct answer
+      function registerCorrect(note) {
+        const bank = LEVELS_BANK[run.level];
+        const xp = bank.perTaskXP;
+        run.runXp += xp;
+        run.results[run.currentQ] = {
+          correct: true,
+          attemptsUsed: 3 - run.attemptsLeft + 1,
+          note: note || "correct",
+        };
+        showFeedback(`✅ Correct — +${xp} XP. ${note || ""}`);
+        // sound and animation
+        try {
+          const utterance = new SpeechSynthesisUtterance("Correct!");
+          speechSynthesis.speak(utterance);
+        } catch (e) {}
+        runXpEl.classList.add('xp-gain');
+        promptArea.classList.add('correct-flash');
+        setTimeout(() => {
+          runXpEl.classList.remove('xp-gain');
+          promptArea.classList.remove('correct-flash');
+        }, 800);
+        // update UI
+        sessionXpEl.textContent = run.runXp;
+        completedQsEl.textContent = run.results.filter(
+          (r) => r && r.correct
+        ).length;
+        runXpEl.textContent = run.runXp;
+        // move on
+        setTimeout(() => {
+          nextQuestion();
+        }, 1000);
+      }
+
+      // register wrong (attempt consumed)
+      function registerWrong() {
+        run.attemptsLeft -= 1;
+        attemptsLeftEl.textContent = run.attemptsLeft;
+        // sound and animation
+        try {
+          const utterance = new SpeechSynthesisUtterance("Wrong!");
+          speechSynthesis.speak(utterance);
+        } catch (e) {}
+        promptArea.classList.add('wrong-flash');
+        setTimeout(() => {
+          promptArea.classList.remove('wrong-flash');
+        }, 500);
+        if (run.attemptsLeft > 0) {
+          showFeedback(
+            `❌ Not quite. You have ${run.attemptsLeft} attempts left.`
+          );
+        } else {
+          // mark wrong and move on
+          run.results[run.currentQ] = {
+            correct: false,
+            attemptsUsed: 3,
+            note: "failed",
+          };
+          showFeedback(
+            `➡️ Attempts exhausted. Moving to next question. Correct answer: ${displayCorrectAnswer(
+              run.tasks[run.currentQ]
+            )}`
+          );
+          setTimeout(() => nextQuestion(), 1200);
+        }
+      }
+
+      // display correct answer for feedback
+      function displayCorrectAnswer(q) {
+        if (!q) return "-";
+        if (q.answer) {
+          if (Array.isArray(q.answer)) return q.answer.join(" / ");
+          return q.answer;
+        }
+        return q.prompt;
+      }
+
+      // proceed to next question
+      function nextQuestion() {
+        run.currentQ++;
+        run.attemptsLeft = 3;
+        attemptsLeftEl.textContent = run.attemptsLeft;
+        questionIndexEl.textContent = Math.min(
+          run.currentQ + 1,
+          run.tasks.length
+        );
+        sessionXpEl.textContent = run.runXp;
+        runXpEl.textContent = run.runXp;
+        const percent = Math.round(
+          (run.runXp / (LEVELS_BANK[run.level].totalXP || 1)) * 100
+        );
+        runBar.style.width = `${Math.min(100, percent)}%`;
+        
+        // Clear last transcript so it doesn't auto-submit again
+        lastTranscript = "";
+
+        // if finished
+        if (run.currentQ >= run.tasks.length) {
+          finishRun();
+        } else {
+          renderQuestion();
+        }
+      }
+
+      // finish run show summary
+      function finishRun() {
+        run.completed = true;
+        // build summary
+        endPanel.classList.remove("hidden");
+        const bank = LEVELS_BANK[run.level];
+        const runXp = run.runXp;
+        const passNeeded = Math.floor(bank.totalXP * 0.7); // 70% needed as per earlier (28/40)
+        const passed = runXp >= passNeeded;
+        endXP.textContent = runXp;
+        endStatus.textContent = passed ? "Passed" : "Below required";
+        // build a list of questions
+        let html = '<ol class="pl-4">';
+        for (let i = 0; i < run.tasks.length; i++) {
+          const t = run.tasks[i];
+          const r = run.results[i] || {
+            correct: false,
+            attemptsUsed: run.attemptsLeft === 3 ? 0 : 3,
+            note: "not answered",
+          };
+          html += `<li class="mb-2"><strong>${escapeHtml(
+            t.prompt
+          )}</strong> — ${
+            r.correct
+              ? '<span style="color:#86efac">Correct</span>'
+              : '<span style="color:#fda4af">Wrong</span>'
+          } (${r.attemptsUsed} tries)</li>`;
+        }
+        html += "</ol>";
+        summaryList.innerHTML = html;
+        // set update/ignore handlers
+        updateBtn.onclick = () => applyRunScore();
+        ignoreBtn.onclick = () => {
+          discardRun();
+        };
+        retryBtn.onclick = () => {
+          startLevel(run.level);
+        };
+        showFeedback(
+          `Run complete. ${
+            passed ? "You can update your score." : "You can retry or ignore."
+          }`
+        );
+      }
+
+      // apply run score to profile (commit)
+      function applyRunScore() {
+        const idx = run.level - 1;
+        const prevBest = profile.perLevelBest[idx] || 0;
+        if (run.runXp > prevBest) {
+          profile.perLevelBest[idx] = run.runXp;
+        }
+        // unlock next if meets threshold
+        const bank = LEVELS_BANK[run.level];
+        const passNeeded = Math.floor(bank.totalXP * 0.7);
+        if (profile.perLevelBest[idx] >= passNeeded) {
+          if (profile.unlockedLevel < idx + 1 && idx < 9) {
+            profile.unlockedLevel = idx + 1;
+          }
+        }
+        // if master level and meets condition, unlock ocean
+        if (run.level === 10 && profile.perLevelBest[idx] >= 28) {
+          profile.oceanUnlocked = true;
+        }
+        profile.streak = (profile.streak || 0) + 1;
+        saveProfile(profile);
+        renderProfile();
+        showFeedback("✅ Score updated and saved to profile.");
+        // Sync with index page
+        window.localStorage.setItem("fqx_mountain_profile_v2", JSON.stringify(profile));
+        setTimeout(() => {
+          buildLevelList();
+          startLevel(run.level);
+          endPanel.classList.add("hidden");
+        }, 700);
+      }
+
+      // discard run
+      function discardRun() {
+        showFeedback("⚠️ Run ignored. No changes saved.");
+        endPanel.classList.add("hidden");
+        // restart current level run
+        setTimeout(() => startLevel(run.level), 600);
+      }
+
+      // ------------------------------ Stress token handling ------------------------------
+      function handleStressSelection(idx) {
+        const q = run.tasks[run.currentQ];
+        // eval with meta.correctSyllable if present
+        if (q.meta && typeof q.meta.correctSyllable === "number") {
+          if (idx === q.meta.correctSyllable) {
+            registerCorrect("Stress chosen correctly");
+          } else {
+            registerWrong();
+          }
+        } else {
+          // manual acceptance for now
+          registerCorrect("Selected (manual eval)");
+        }
+      }
+
+      // ------------------------------ Dialog flow for Master ------------------------------
+      async function startDialogFlow(q) {
+        // For dialog tasks, we'll run a mini exchange: AI says prompt (q.prompt), user answers via mic or typed input,
+        // repeat for average of 4 exchanges.
+        const exchanges = 4;
+        let dialogCount = 0;
+        showFeedback("Starting dialog. Press Mic and reply when AI finishes.");
+        async function aiSay(text) {
+          return new Promise((res) => {
+            try {
+              const u = new SpeechSynthesisUtterance(text);
+              u.lang = "en-US";
+              u.rate = 1;
+              u.pitch = 1;
+              u.onend = () => res();
+              speechSynthesis.cancel();
+              speechSynthesis.speak(u);
+            } catch (e) {
+              res();
+            }
+          });
+        }
+        // simplified dialog: AI uses prewritten prompts and accepts any reply with >=2 words as success
+        for (let i = 0; i < exchanges; i++) {
+          const promptText = q.prompt + (i > 0 ? ` (follow-up ${i})` : "");
+          await aiSay(promptText);
+          // start recognition
+          const heard = await captureSpeechOnce(7000);
+          if (!heard || heard.trim().length < 2) {
+            // allow retry twice
+            const heard2 = await captureSpeechOnce(7000);
+            if (heard2 && heard2.trim().length >= 2) {
+              // accept
+              showFeedback(`AI heard: ${escapeHtml(heard2)}`);
+              registerTempCorrect("Dialog reply accepted");
+            } else {
+              showFeedback("No meaningful reply heard. Dialog continues.");
+              registerTempWrong();
+            }
+          } else {
+            showFeedback(`AI heard: ${escapeHtml(heard)}`);
+            registerTempCorrect("Dialog reply accepted");
+          }
+          dialogCount++;
+        }
+        // after exchanges, evaluate: if at least 3 replies accepted, mark whole dialog correct
+        const lastIndex = run.currentQ;
+        const correctCount = run.results.filter(
+          (r) => (r && r.note && r.note.includes("Dialog")) || (r && r.correct)
+        ).length;
+        // simplistic: if user replied to at least 3 out of 4 with meaningful replies, grant XP
+        // Here we already recorded temporary results in registerTempCorrect/Wrong storing to run.results[run.currentQ] partial; to simplify, we just mark success if last reply had some length
+        // For safety, give at least partial credit
+        registerCorrect("Dialog exchanges completed");
+      }
+
+      // helper temporary registration
+      function registerTempCorrect(note) {
+        // mark partial as correct but do not award full XP until end; for simplicity, add fractional XP (here we add full perTaskXP)
+        const bank = LEVELS_BANK[run.level];
+        run.runXp += bank.perTaskXP;
+        run.results[run.currentQ] = {
+          correct: true,
+          attemptsUsed: 3 - run.attemptsLeft + 1,
+          note: "Dialog — " + (note || ""),
+        };
+      }
+      function registerTempWrong() {
+        run.results[run.currentQ] = {
+          correct: false,
+          attemptsUsed: 3,
+          note: "Dialog — no reply",
+        };
+      }
+
+      // capture speech once (promise)
+      function captureSpeechOnce(timeout = 6000) {
+        return new Promise((resolve) => {
+          if (!recognition) {
+            resolve(null);
+            return;
+          }
+          let finished = false;
+          const tmpRec = new (window.SpeechRecognition ||
+            window.webkitSpeechRecognition)();
+          tmpRec.lang = "en-US";
+          tmpRec.interimResults = false;
+          tmpRec.maxAlternatives = 1;
+          tmpRec.onresult = (ev) => {
+            const t = ev.results[0][0].transcript || "";
+            if (!finished) {
+              finished = true;
+              tmpRec.stop();
+              resolve(t);
+            }
+          };
+          tmpRec.onerror = (e) => {
+            if (!finished) {
+              finished = true;
+              tmpRec.stop();
+              resolve(null);
+            }
+          };
+          tmpRec.onend = () => {
+            if (!finished) {
+              finished = true;
+              resolve(null);
+            }
+          };
+          try {
+            tmpRec.start();
+            setTimeout(() => {
+              if (!finished) {
+                finished = true;
+                try {
+                  tmpRec.stop();
+                } catch (e) {}
+                resolve(null);
+              }
+            }, timeout);
+          } catch (e) {
+            resolve(null);
+          }
+        });
+      }
+
+      // ------------------------------ Button bindings ------------------------------
+      function bindControls() {
+        submitBtn.addEventListener("click", onSubmit);
+        skipBtn.addEventListener("click", onSkip);
+        finishRunBtn.addEventListener("click", () => finishRun());
+        micBtn.addEventListener("click", () => {
+          if (!recognition) {
+            showFeedback("Mic not supported in this browser.");
+            return;
+          }
+          if (micOn) {
+            try {
+              recognition.stop();
+            } catch (e) {}
+          } else {
+            try {
+              recognition.start();
+            } catch (e) {}
+          }
+        });
+      }
+
+      // on submit — evaluate current question manually if needed
+      function onSubmit() {
+        const q = run.tasks[run.currentQ];
+        if (!q) return;
+        // if text input present
+        const textInput = document.getElementById("textInput");
+        if (textInput && !textInput.classList.contains('hidden')) {
+          const val = (textInput.value || "").toLowerCase().trim();
+          if (!val) {
+            showFeedback("Please type your reply before submitting.");
+            return;
+          }
+          // evaluate based on evalType
+          if (
+            q.evalType === "exact" ||
+            q.evalType === "speechContains" ||
+            q.evalType === "manual"
+          ) {
+            const expected = (q.answer || "").toLowerCase();
+            if (Array.isArray(q.answer)) {
+              // for pairs, check any answer included
+              const matched = q.answer.some((a) =>
+                val.includes(a.toLowerCase())
+              );
+              if (matched) registerCorrect("Manual text matched");
+              else registerWrong();
+            } else {
+              if (
+                val === expected ||
+                val.includes(expected) ||
+                expected.includes(val)
+              ) {
+                registerCorrect("Text matched");
+              } else {
+                registerWrong();
+              }
+            }
+          } else {
+            // default accept if length > 1
+            if (val.split(/\s+/).length >= 1) {
+              registerCorrect("Manual reply accepted");
+            } else registerWrong();
+          }
+          return;
+        }
+
+        // if stress tokens exist, user should click; if none, try auto-evaluation by lastTranscript
+        if (q.evalType === "manual" || q.type === "stress") {
+          showFeedback("Select an option (stress tokens) or use mic to speak.");
+          return;
+        }
+
+        // if last transcript exists, try auto-evaluate
+        if (lastTranscript && lastTranscript.trim().length > 0) {
+          autoEvaluateSpeech(lastTranscript);
+          return;
+        }
+
+        // fallback: ask user confirm correct (manual)
+        const manual = confirm(
+          "No speech detected. Mark this question as correct? (Use only if you actually answered correctly)"
+        );
+        if (manual) registerCorrect("Manually confirmed");
+        else registerWrong();
+      }
+
+      // skip current question (forfeit)
+      function onSkip() {
+        if (!confirm("Skip this question? You will lose XP for it.")) return;
+        run.results[run.currentQ] = {
+          correct: false,
+          attemptsUsed: 3,
+          note: "skipped",
+        };
+        nextQuestion();
+      }
+
+      // ------------------------------ Helpers & UI effects ------------------------------
+      function enableSubmit(flag) {
+        if (flag) {
+          submitBtn.classList.remove("disabled");
+          submitBtn.disabled = false;
+        } else {
+          submitBtn.classList.add("disabled");
+          submitBtn.disabled = true;
+        }
+      }
+
+      // small visual fireflies
+      // function placeFireflies(){
+      //   for(let i=0;i<14;i++){
+      //     const el = document.createElement('div');
+      //     el.className = 'firefly';
+      //     el.style.left = Math.random()*100 + '%';
+      //     el.style.top = Math.random()*100 + '%';
+      //     el.style.opacity = (0.4 + Math.random()*0.6);
+      //     el.style.transform = `scale(${0.6 + Math.random()*1.2})`;
+      //     document.body.appendChild(el);
+      //   }
+      // }
+
+      // small util to update run bar periodically
+      setInterval(() => {
+        if (run) {
+          const bank = LEVELS_BANK[run.level];
+          const percent = Math.round((run.runXp / (bank.totalXP || 1)) * 100);
+          runBar.style.width = `${Math.min(100, percent)}%`;
+          runXpEl.textContent = run.runXp;
+          sessionXpEl.textContent = run.runXp;
+        }
+      }, 500);
+
+      // ------------------------------ Init ------------------------------
+      initUI();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌊 Ocean Quest - Index</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Quicksand:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80")
+          no-repeat center center/cover;
+        font-family: "Quicksand", sans-serif;
+        color: #ecfeff;
+        overflow-x: hidden;
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(7, 31, 50, 0.85) 0%,
+          rgba(6, 182, 212, 0.15) 100%
+        );
+        backdrop-filter: blur(3px);
+        z-index: 0;
+      }
+      .title {
+        font-family: "Press Start 2P", cursive;
+        text-shadow: 0 0 18px #06b6d4, 0 2px 24px #082f49;
+        letter-spacing: 2px;
+      }
+      .card {
+        background: rgba(3, 105, 161, 0.9);
+        border: 2px solid rgba(6, 182, 212, 0.5);
+        border-radius: 1.2rem;
+        padding: 1.5rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+      .card:hover:not(.locked) {
+        transform: translateY(-8px) scale(1.04);
+        box-shadow: 0 0 32px 0 #06b6d4;
+        z-index: 2;
+      }
+      .locked {
+        filter: grayscale(100%);
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .back-btn {
+        background: rgba(7, 89, 133, 0.8);
+        border: 2px solid #06b6d4;
+        border-radius: 0.75rem;
+        padding: 0.5rem 1rem;
+        font-weight: bold;
+        color: #e0f2fe;
+        transition: background 0.2s;
+      }
+      .back-btn:hover {
+        background: rgba(6, 182, 212, 0.9);
+      }
+      .bubble {
+        position: absolute;
+        border-radius: 999px;
+        background: radial-gradient(circle, #cffafe 60%, #06b6d4 100%);
+        opacity: 0.6;
+        pointer-events: none;
+        animation: rise 10s linear infinite;
+      }
+      @keyframes rise {
+        0% {
+          transform: translateY(0) scale(1);
+        }
+        100% {
+          transform: translateY(-200px) scale(0.6);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <div class="overlay"></div>
+
+    <header class="relative z-10 text-center py-8">
+      <!-- home button in the top right corner t navigate the home page -->
+      <button
+        class="back-btn act"
+        onclick="window.location.href='game-index.html'"
+        style="float: right; margin: 0 20px; z-index: 1000"
+      >
+        🗺️ Game Menu
+      </button>
+      <h1 class="title text-3xl md:text-4xl text-cyan-100">🌊 Ocean Quest</h1>
+      <p class="mt-2 text-cyan-100">Advanced Speaking & Real-Life Fluency</p>
+      <p class="mt-1 text-cyan-200 text-sm">
+        Current XP: <span id="xp">0</span> | Region:
+        <span id="region">Ocean</span>
+      </p>
+      <button onclick="goBack()" class="back-btn mt-4">
+        ⬅ Back to Mountain
+      </button>
+    </header>
+
+    <main
+      class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 max-w-6xl mx-auto mb-12"
+      id="levelsGrid"
+    ></main>
+
+    <footer class="relative z-10 text-center text-cyan-100 text-sm py-4">
+      © 2025 Ocean Quest
+    </footer>
+
+    <script>
+      const PROFILE_KEY = "fqx_ocean_profile_v1";
+      const MOUNTAIN_KEY = "fqx_mountain_profile_v2";
+
+      const LEVEL_HINTS = [
+        "Practice polite daily dialogs.",
+        "Roleplay ordering food.",
+        "Ask prices and shop politely.",
+        "Reply like a phone call.",
+        "Ask for travel directions.",
+        "Answer interview questions.",
+        "Solve polite complaints.",
+        "Speak in emergencies.",
+        "Tell daily stories.",
+        "Full conversation Boss.",
+      ];
+
+      function loadProfile() {
+        let raw = localStorage.getItem(PROFILE_KEY);
+        let profile = {
+          perLevelBest: Array(10).fill(0),
+          unlockedLevel: 0,
+        };
+        if (raw) {
+          try {
+            let p = JSON.parse(raw);
+            if (!p.perLevelBest || p.perLevelBest.length !== 10)
+              p.perLevelBest = Array(10).fill(0);
+            if (typeof p.unlockedLevel !== "number") p.unlockedLevel = 0;
+            profile = p;
+          } catch (e) {}
+        }
+        return profile;
+      }
+
+      function checkMountainUnlock() {
+        let raw = localStorage.getItem(MOUNTAIN_KEY);
+        if (!raw) return false;
+        let mountain = JSON.parse(raw);
+        let totalXp = mountain.perLevelBest
+          ? mountain.perLevelBest.reduce((a, b) => a + b, 0)
+          : 0;
+        let maxXp = 10 * 10; // 10 levels × 10 XP each
+        return totalXp >= maxXp * 0.7;
+      }
+
+      function updateUI() {
+        let profile = loadProfile();
+        let totalXp = profile.perLevelBest.reduce((a, b) => a + b, 0);
+        document.getElementById("xp").innerText = totalXp;
+
+        const unlocked = checkMountainUnlock();
+        const unlockedLevel = unlocked ? profile.unlockedLevel : 0;
+
+        const grid = document.getElementById("levelsGrid");
+        grid.innerHTML = "";
+        for (let i = 1; i <= 10; i++) {
+          let locked = !unlocked || i > unlockedLevel + 1;
+          let best = profile.perLevelBest[i - 1] || 0;
+          let hint = LEVEL_HINTS[i - 1];
+          grid.innerHTML += `
+            <div id="level${i}" class="card ${
+            locked ? "locked" : ""
+          }" onclick="${locked ? "" : `openLevel(${i})`}">
+              <h2 class="font-bold text-xl text-cyan-100 mb-2">
+                Level ${i} – ${getLevelTitle(i)}
+              </h2>
+              <p class="text-cyan-100">${getLevelDesc(i)}</p>
+              <div class="mt-2 text-cyan-200 text-xs">Best: ${best} / 10</div>
+              <div class="mt-1 text-cyan-100 text-xs">${hint}</div>
+              ${
+                locked
+                  ? '<div class="absolute top-2 right-2 text-yellow-200 text-xs">🔒 Locked</div>'
+                  : ""
+              }
+            </div>
+          `;
+        }
+        for (let i = 0; i < 14; i++) {
+          let b = document.createElement("div");
+          b.className = "bubble";
+          b.style.left = Math.random() * 95 + "%";
+          b.style.bottom = Math.random() * 50 + "px";
+          b.style.width = b.style.height = 6 + Math.random() * 10 + "px";
+          b.style.animationDuration = 6 + Math.random() * 6 + "s";
+          grid.appendChild(b);
+        }
+      }
+
+      function getLevelTitle(i) {
+        const titles = [
+          "Polite Conversations 🤝",
+          "Restaurant Roleplay 🍽",
+          "Shopping Challenge 🛍",
+          "Telephone Talk ☎",
+          "Travel & Directions 🧭",
+          "Mini-Interview 💼",
+          "Problem Solving 🛠",
+          "Emergency Talk 🚨",
+          "Storytelling 📖",
+          "Ocean Boss 🌟",
+        ];
+        return titles[i - 1] || "";
+      }
+      function getLevelDesc(i) {
+        const descs = [
+          "Dialogues with politeness.",
+          "Order food and converse.",
+          "Shop and bargain politely.",
+          "Handle phone dialogs.",
+          "Ask and follow directions.",
+          "Answer interview basics.",
+          "Politely solve issues.",
+          "Communicate in emergencies.",
+          "Narrate fluent stories.",
+          "Full real-life conversation.",
+        ];
+        return descs[i - 1] || "";
+      }
+
+      function openLevel(n) {
+        let profile = loadProfile();
+        let unlockedLevel = profile.unlockedLevel || 0;
+        if (n > unlockedLevel + 1) {
+          alert("🔒 Level locked. Score at least 7/10 in previous!");
+          return;
+        }
+        window.location.href = `ocean-levels.html?level=${n}`;
+      }
+
+      function goBack() {
+        window.location.href = "mountain-index.html";
+      }
+
+      updateUI();
+    </script>
+  </body>
+</html>

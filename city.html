@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>🏙 City — Real-Life Communication (Levels)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      defer
+      src="https://unpkg.com/compromise@13.14.3/builds/compromise.min.js"
+    ></script>
+    <style>
+      :root {
+        --city-ink: #0b1220;
+        --city-1: #0a1324;
+        --city-2: #0e1d33;
+        --city-3: #0d2749;
+        --neon: #22d3ee;
+        --neon2: #06b6d4;
+        --lime: #84cc16;
+        --gold: #f59e0b;
+        --rose: #fb7185;
+        --glass: rgba(18, 28, 48, 0.55);
+        --line: rgba(255, 255, 255, 0.12);
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        color: #e6f3ff;
+        background: radial-gradient(
+            40vw 40vh at 20% -10%,
+            rgba(34, 211, 238, 0.18),
+            transparent 60%
+          ),
+          radial-gradient(
+            50vw 40vh at 80% -15%,
+            rgba(6, 182, 212, 0.15),
+            transparent 60%
+          ),
+          linear-gradient(
+            180deg,
+            var(--city-1) 0%,
+            var(--city-2) 40%,
+            var(--city-3) 100%
+          );
+        font-family: "Rubik", system-ui, -apple-system, Segoe UI, Roboto,
+          "Helvetica Neue", Arial;
+        overflow-x: hidden;
+      }
+      .title {
+        font-family: "Press Start 2P", monospace;
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 10px rgba(34, 211, 238, 0.45);
+      }
+      .glass {
+        background: var(--glass);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(6px);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      }
+      .chip {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.06);
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.8rem;
+      }
+      .btn {
+        display: inline-flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+        padding: 0.7rem 1.1rem;
+        border-radius: 14px;
+        font-weight: 800;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: linear-gradient(135deg, var(--neon), var(--neon2));
+        color: #02131b;
+        transition: 0.15s;
+        box-shadow: 0 6px 16px rgba(6, 182, 212, 0.25),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+      }
+      .btn-ghost {
+        background: rgba(255, 255, 255, 0.08);
+        color: #e8fbff;
+      }
+      .btn-danger {
+        background: linear-gradient(135deg, #fb7185, #f43f5e);
+        color: white;
+      }
+      .grid-c {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1rem;
+      }
+      .card {
+        grid-column: span 12 / span 12;
+      }
+      @media (min-width: 768px) {
+        .card {
+          grid-column: span 6 / span 6;
+        }
+      }
+      @media (min-width: 1200px) {
+        .card {
+          grid-column: span 4 / span 4;
+        }
+      }
+      .lock {
+        opacity: 0.55;
+        filter: saturate(0.75);
+        pointer-events: none;
+      }
+      .meter {
+        width: 100%;
+        height: 10px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .meter > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--lime), #22c55e, #16a34a);
+        transition: width 0.25s ease;
+      }
+      .city-skyline {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background: linear-gradient(
+            180deg,
+            rgba(2, 6, 23, 0) 0%,
+            rgba(2, 6, 23, 0.6) 70%,
+            rgba(2, 6, 23, 1) 100%
+          ),
+          url("https://images.unsplash.com/photo-1465414829459-d228b58caf6e?q=80&w=2000&auto=format&fit=crop")
+            center/cover no-repeat;
+        opacity: 0.18;
+        /* mix-blend-lighten; */
+      }
+      .neon-frame {
+        border: 1px solid rgba(34, 211, 238, 0.35);
+        box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.07),
+          0 0 26px rgba(6, 182, 212, 0.18) inset;
+        border-radius: 18px;
+      }
+      .talk {
+        max-height: 52vh;
+        overflow: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+      }
+      .bubble {
+        max-width: 82%;
+        padding: 0.7rem 0.9rem;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+        line-height: 1.35;
+      }
+      .bubble.ai {
+        background: rgba(14, 165, 233, 0.12);
+        border-color: rgba(56, 189, 248, 0.25);
+      }
+      .bubble.user {
+        background: rgba(132, 204, 22, 0.12);
+        border-color: rgba(132, 204, 22, 0.25);
+      }
+      .pulse-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--neon);
+        box-shadow: 0 0 14px rgba(34, 211, 238, 0.8);
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: 0.9;
+        }
+        50% {
+          transform: scale(1.25);
+          opacity: 0.6;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0.9;
+        }
+      }
+      .city-gate {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        font-size: 0.85rem;
+        z-index: 20;
+      }
+      .kbd {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-bottom-width: 2px;
+        border-radius: 6px;
+        padding: 0.05rem 0.35rem;
+        font-weight: 800;
+        font-size: 0.8rem;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .tts-voice {
+        max-width: 340px;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen max-w-7xl mx-auto relative">
+    <div class="city-skyline" aria-hidden="true"></div>
+
+    <!-- Header -->
+    <header class="relative z-10 px-4 pt-6">
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+      >
+        <div>
+          <h1 class="title text-2xl md:text-3xl text-sky-200">
+            City — Real-Life Communication
+          </h1>
+          <p class="text-sky-100/80 text-sm mt-2">
+            Voice in/out • Real-time conversation • Offline evaluation
+          </p>
+        </div>
+        <div class="glass px-4 py-3 flex flex-wrap items-center gap-2 md:gap-3">
+          <span class="chip">XP: <b id="xp">0</b></span>
+          <span class="chip">Completed: <b id="done">0</b>/10</span>
+          <span class="chip">Master Ready: <b id="masterReady">No</b></span>
+          <button id="resetBtn" class="btn-ghost btn">Reset City</button>
+          <a href="game-index.html" class="btn-ghost btn">Back to Game Menu</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Unlock banner (Ocean prerequisite) -->
+    <section id="lockBanner" class="relative z-10 px-4 pt-4 hidden">
+      <div class="glass p-4 md:p-5 border border-sky-400/40">
+        <div
+          class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3"
+        >
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🔒</span>
+            <div>
+              <p class="font-bold text-sky-100">City Region Locked</p>
+              <p class="text-sky-200/90 text-sm">
+                Complete Ocean Region (Master ≥ 70 XP) to unlock the City.
+              </p>
+            </div>
+          </div>
+          <a href="ocean-index.html" class="btn btn-ghost">Go to Ocean 🌊</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Levels Grid -->
+    <main id="main" class="relative z-10 px-4 pt-4 pb-28">
+      <div id="levelsGrid" class="grid-c">
+        <!-- Cards injected here -->
+      </div>
+
+      <!-- Play Panel -->
+      <section id="playPanel" class="mt-6 glass p-4 md:p-6 hidden">
+        <button id="back" class="btn-ghost btn my-4">Back to levels</button
+        ><br />
+        <div class="flex flex-col lg:flex-row gap-4">
+          <!-- Left: chat -->
+          <div class="neon-frame flex-1 p-3 md:p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">💬</span>
+                <h3 id="playTitle" class="font-extrabold text-lg md:text-xl">
+                  Scenario
+                </h3>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="levelChip" class="chip">Level 1</span>
+                <span class="chip">Goal: <b id="goalChip">10</b> XP</span>
+                <span class="chip">Pass ≥ <b id="needChip">8</b></span>
+              </div>
+            </div>
+
+            <div id="talk" class="talk mt-3 md:mt-4 pr-1 space-y-3">
+              <!-- Messages -->
+            </div>
+
+            <div class="mt-3">
+              <div class="meter mb-2">
+                <span id="meter" style="width: 0%"></span>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 text-sm">
+                <span>Turn <b id="turnNo">1</b>/<b id="turnMax">10</b></span>
+                <span>•</span>
+                <span>XP: <b id="runXp">0</b>/<b id="goalShow">10</b></span>
+                <span>•</span>
+                <span>Retries left: <b id="retries">2</b></span>
+              </div>
+            </div>
+
+            <div
+              class="mt-3 md:mt-4 flex flex-col md:flex-row items-stretch md:items-center gap-2"
+            >
+              <div class="flex-1 flex items-center gap-2">
+                <button
+                  id="micBtn"
+                  class="btn tts-voice"
+                  title="Start / Stop voice"
+                >
+                  <span id="micIcon">🎙️</span> Speak
+                </button>
+                <button id="hintBtn" class="btn btn-ghost" title="Show a hint">
+                  Hint
+                </button>
+                <button
+                  id="skipBtn"
+                  class="btn btn-ghost"
+                  title="Skip this turn"
+                >
+                  Skip
+                </button>
+              </div>
+              <div class="flex-1 flex gap-2">
+                <input
+                  id="textInput"
+                  class="flex-1 bg-transparent border border-white/20 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-400/60"
+                  placeholder="Type your reply if mic not available..."
+                />
+                <button id="sendBtn" class="btn">Send</button>
+              </div>
+            </div>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <label class="flex items-center gap-2">
+                <input
+                  id="voiceToggle"
+                  type="checkbox"
+                  class="accent-cyan-400"
+                  checked
+                />
+                <span class="text-sm">AI replies with voice</span>
+              </label>
+
+              <label class="flex items-center gap-2">
+                <input
+                  id="autoTurn"
+                  type="checkbox"
+                  class="accent-cyan-400"
+                  checked
+                />
+                <span class="text-sm">Auto-advance on correct</span>
+              </label>
+
+              <div class="flex items-center gap-2 ml-auto">
+                <span class="text-xs text-sky-200/80">Shortcuts:</span>
+                <span class="kbd">M</span><span class="text-xs">Mic</span>
+                <span class="kbd">Enter</span><span class="text-xs">Send</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: info -->
+          <aside class="neon-frame w-full lg:w-[360px] p-3 md:p-4">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">📊</span>
+              <h4 class="font-extrabold text-lg">Live Evaluation</h4>
+            </div>
+            <div class="mt-3 space-y-2 text-sm">
+              <div class="flex items-center justify-between">
+                <span>Similarity</span
+                ><span id="simOut" class="chip">0.00</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>Grammar (POS)</span
+                ><span id="gramOut" class="chip">N/A</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>Keywords</span><span id="keyOut" class="chip">—</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>Decision</span><span id="judgeOut" class="chip">—</span>
+              </div>
+            </div>
+
+            <hr class="my-3 border-white/10" />
+
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">🗺️</span>
+                <h4 class="font-extrabold text-lg">Progress</h4>
+              </div>
+              <div class="mt-3 space-y-2">
+                <div class="text-sm">
+                  This Level Best: <b id="bestHere">0</b> /
+                  <b id="bestMax">10</b>
+                </div>
+                <div class="meter">
+                  <span id="bestMeter" style="width: 0%"></span>
+                </div>
+                <div class="text-sm mt-2">
+                  Global XP: <b id="globalXp">0</b>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-3 border-white/10" />
+
+            <div class="space-y-2">
+              <button id="finishBtn" class="btn w-full">
+                Finish & Update Score
+              </button>
+              <button id="ignoreBtn" class="btn-ghost w-full">
+                Ignore This Run
+              </button>
+            </div>
+
+            <div class="mt-3 text-xs text-sky-100/80">
+              Pass rule: Need <b id="passRule">8</b> XP (≥ 75%) to unlock next
+              level.
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Gate (Master unlock note) -->
+    <div class="city-gate glass px-3 py-2 hidden" id="masterGate">
+      Master unlocked! Collect your
+      <span
+        class="chip"
+        style="
+          background: rgba(245, 158, 11, 0.15);
+          border-color: rgba(245, 158, 11, 0.35);
+          color: #fff;
+        "
+        >Fluency Master</span
+      >
+      after clearing all levels.
+    </div>
+
+    <script>
+      /* =========================
+       STORAGE KEYS & CONSTANTS
+       ========================= */
+      const CITY_KEY = "fqx_city_profile_v1"; // this region
+      const OCEAN_KEY = "fqx_ocean_profile_v1"; // prerequisite check
+      const PASS_RATIO = 0.75; // 75% to pass & unlock next
+      const MAX_PER_LEVEL = 10; // each level is up to 10 XP
+      const LEVEL_COUNT = 10;
+
+      /* =========================
+       UNLOCK CHECK: Ocean ≥ 70
+       ========================= */
+      function oceanCleared() {
+        try {
+          const raw = localStorage.getItem(OCEAN_KEY);
+          if (!raw) return false;
+          const o = JSON.parse(raw);
+          const master = o?.perLevelBest?.[10] || 0;
+          return master >= 70;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      /* =========================
+       PROFILE LOAD / SAVE
+       ========================= */
+      function freshProfile() {
+        return {
+          perLevelBest: Array(LEVEL_COUNT + 1).fill(0), // [0..9]=levels, [10]=master (future)
+          unlocked: Array(LEVEL_COUNT).fill(false),
+          masterUnlocked: false,
+        };
+      }
+      function loadProfile() {
+        let p = freshProfile();
+        try {
+          const raw = localStorage.getItem(CITY_KEY);
+          if (raw) Object.assign(p, JSON.parse(raw));
+        } catch (e) {}
+        if (!p.unlocked[0]) p.unlocked[0] = true;
+        return p;
+      }
+      function saveProfile(p) {
+        localStorage.setItem(CITY_KEY, JSON.stringify(p));
+      }
+
+      /* =========================
+       SCENARIOS (Levels 1..10)
+       Each level has 10 turns (Q/A). XP = 1 per correct.
+       Provide acceptable answers & keywords for evaluation.
+       ========================= */
+      const SCENARIOS = [
+        {
+          id: 1,
+          icon: "🧾",
+          title: "Formal Introductions",
+          desc: "Introduce yourself in work / social contexts.",
+          prompts: [
+            {
+              ai: "Good morning. Could you please introduce yourself briefly?",
+              keys: ["name", "from", "role"],
+              accepts: [
+                "My name is * and I am from *",
+                "I am * from * currently working as *",
+                "Hello, I’m * and I work as *",
+              ],
+            },
+            {
+              ai: "What do you do?",
+              keys: ["work", "study", "job"],
+              accepts: ["I work as *", "I am a student", "I’m doing my * in *"],
+            },
+            {
+              ai: "Which city are you from?",
+              keys: ["from", "city"],
+              accepts: ["I am from *", "I live in *"],
+            },
+            {
+              ai: "How did you hear about us?",
+              keys: ["friend", "internet", "social"],
+              accepts: [
+                "From a friend",
+                "On the internet",
+                "Through social media",
+              ],
+            },
+            {
+              ai: "What are your strengths?",
+              keys: ["strength", "good", "skills"],
+              accepts: [
+                "My strengths are *",
+                "I am good at *",
+                "I have strong * skills",
+              ],
+            },
+            {
+              ai: "What are your hobbies?",
+              keys: ["hobby", "free time"],
+              accepts: [
+                "I like *",
+                "My hobbies are *",
+                "I enjoy * in my free time",
+              ],
+            },
+            {
+              ai: "Why are you interested in this event?",
+              keys: ["interest", "learn", "network"],
+              accepts: [
+                "I want to learn *",
+                "I’m interested in *",
+                "To network and learn",
+              ],
+            },
+            {
+              ai: "Could you share one recent achievement?",
+              keys: ["won", "project", "achievement"],
+              accepts: ["I completed *", "I won *", "I achieved *"],
+            },
+            {
+              ai: "How comfortable are you with public speaking?",
+              keys: ["comfortable", "public", "speaking"],
+              accepts: [
+                "I’m comfortable",
+                "I’m improving my public speaking",
+                "I practice often",
+              ],
+            },
+            {
+              ai: "Nice to meet you. Any questions for me?",
+              keys: ["question", "ask"],
+              accepts: [
+                "I would like to ask *",
+                "Yes, could you tell me about *",
+                "No questions now, thank you",
+              ],
+            },
+          ],
+        },
+        {
+          id: 2,
+          icon: "🏢",
+          title: "Office Communication",
+          desc: "Meetings, updates, polite emails.",
+          prompts: [
+            {
+              ai: "Can you give a quick status update on your task?",
+              keys: ["status", "update", "progress"],
+              accepts: [
+                "The task is *% done",
+                "I finished * and next I will *",
+                "I’m on track and will deliver by *",
+              ],
+            },
+            {
+              ai: "Please send the report by today.",
+              keys: ["send", "report", "today"],
+              accepts: [
+                "I’ll send the report today",
+                "I will email it by EOD",
+                "Sure, I’ll share it soon",
+              ],
+            },
+            {
+              ai: "There is a blocker. Any suggestions?",
+              keys: ["block", "issue", "suggest"],
+              accepts: ["We can try *", "Let’s discuss *", "I suggest *"],
+            },
+            {
+              ai: "Could you schedule a meeting for tomorrow?",
+              keys: ["schedule", "meeting", "tomorrow"],
+              accepts: [
+                "I’ll schedule a meeting for tomorrow",
+                "I will set up a call",
+                "Sure, I’ll send an invite",
+              ],
+            },
+            {
+              ai: "Please keep the client informed.",
+              keys: ["client", "inform", "update"],
+              accepts: [
+                "I’ll update the client",
+                "I will inform the client",
+                "I’ll send a status mail",
+              ],
+            },
+            {
+              ai: "We need to prioritize this bug.",
+              keys: ["prioritize", "bug", "fix"],
+              accepts: [
+                "I’ll prioritize the bug",
+                "I’ll fix it first",
+                "We will address it immediately",
+              ],
+            },
+            {
+              ai: "Can you review my document?",
+              keys: ["review", "document", "feedback"],
+              accepts: [
+                "I’ll review and share feedback",
+                "I will check and revert",
+                "Sure, I’ll take a look",
+              ],
+            },
+            {
+              ai: "Let’s wrap up in five minutes.",
+              keys: ["wrap", "finish", "five"],
+              accepts: [
+                "Let’s wrap up",
+                "We can finish in five",
+                "Okay, we will finish soon",
+              ],
+            },
+            {
+              ai: "We may need to extend the deadline.",
+              keys: ["extend", "deadline"],
+              accepts: [
+                "We can extend the deadline",
+                "Let’s request an extension",
+                "I agree, let’s extend it",
+              ],
+            },
+            {
+              ai: "Please summarize the meeting points.",
+              keys: ["summary", "points", "minutes"],
+              accepts: [
+                "Summary: *",
+                "To summarize, *",
+                "The main points are *",
+              ],
+            },
+          ],
+        },
+        {
+          id: 3,
+          icon: "🛫",
+          title: "Travel Abroad",
+          desc: "Airport & hotel conversations.",
+          prompts: [
+            {
+              ai: "May I see your passport and ticket?",
+              keys: ["passport", "ticket", "here"],
+              accepts: [
+                "Here is my passport and ticket",
+                "Sure, here you go",
+                "Yes, please take it",
+              ],
+            },
+            {
+              ai: "What is the purpose of your visit?",
+              keys: ["business", "tourism", "study"],
+              accepts: ["Tourism", "Business trip", "I am here to study"],
+            },
+            {
+              ai: "How many bags are you checking in?",
+              keys: ["bag", "check"],
+              accepts: ["I have one bag", "Two bags", "Only a cabin bag"],
+            },
+            {
+              ai: "Do you have anything to declare?",
+              keys: ["declare", "custom"],
+              accepts: [
+                "Nothing to declare",
+                "No, I don’t",
+                "I have some gifts only",
+              ],
+            },
+            {
+              ai: "Your room is ready. Do you need breakfast tomorrow?",
+              keys: ["breakfast", "yes", "no"],
+              accepts: ["Yes, please", "No, thank you", "I’ll decide later"],
+            },
+            {
+              ai: "Would you like a wake-up call?",
+              keys: ["wake", "call", "morning"],
+              accepts: [
+                "Yes, at 6 AM please",
+                "No, thanks",
+                "Please set at 7 AM",
+              ],
+            },
+            {
+              ai: "How long will you be staying?",
+              keys: ["stay", "days"],
+              accepts: ["I’ll stay for * days", "Three nights", "One week"],
+            },
+            {
+              ai: "Any special requests?",
+              keys: ["request", "room", "view"],
+              accepts: [
+                "High-floor room please",
+                "A quiet room please",
+                "Sea view if possible",
+              ],
+            },
+            {
+              ai: "Your flight is delayed by one hour.",
+              keys: ["delay", "okay"],
+              accepts: [
+                "Okay, thank you",
+                "Alright, I’ll wait",
+                "Thanks for the update",
+              ],
+            },
+            {
+              ai: "Enjoy your trip!",
+              keys: ["thanks", "thank you"],
+              accepts: ["Thank you!", "Thanks a lot", "I appreciate it"],
+            },
+          ],
+        },
+        {
+          id: 4,
+          icon: "🎤",
+          title: "Public Speaking",
+          desc: "Talk 1–2 minutes. We check structure.",
+          prompts: [
+            {
+              ai: "Please speak about 'Technology in Education' in 2–4 sentences.",
+              keys: ["technology", "education"],
+              accepts: [
+                "Technology helps *",
+                "In education, technology *",
+                "Students can * using technology",
+              ],
+            },
+            {
+              ai: "Give one benefit of online learning.",
+              keys: ["benefit", "online", "learning"],
+              accepts: [
+                "Online learning is flexible",
+                "It saves time",
+                "It gives access to resources",
+              ],
+            },
+            {
+              ai: "Share one challenge of online learning.",
+              keys: ["challenge"],
+              accepts: [
+                "Distractions at home",
+                "Internet issues",
+                "Lack of interaction",
+              ],
+            },
+            {
+              ai: "What solution would you suggest?",
+              keys: ["solution", "suggest"],
+              accepts: [
+                "Create a schedule",
+                "Improve internet",
+                "Use interactive tools",
+              ],
+            },
+            {
+              ai: "Conclude your talk.",
+              keys: ["conclude", "summary"],
+              accepts: [
+                "In conclusion *",
+                "To summarize *",
+                "Overall, technology *",
+              ],
+            },
+            {
+              ai: "How can teachers adapt?",
+              keys: ["teachers", "adapt"],
+              accepts: [
+                "By using digital tools",
+                "By giving interactive tasks",
+                "By providing feedback online",
+              ],
+            },
+            {
+              ai: "How can students stay motivated?",
+              keys: ["students", "motivate"],
+              accepts: ["Set goals", "Take short breaks", "Study with friends"],
+            },
+            {
+              ai: "Name one tool you use daily.",
+              keys: ["tool", "use"],
+              accepts: [
+                "I use Google Classroom",
+                "I use Zoom",
+                "I use YouTube",
+              ],
+            },
+            {
+              ai: "Give an example of blended learning.",
+              keys: ["blended"],
+              accepts: [
+                "Mix of online and offline",
+                "Online videos with classroom",
+                "Hybrid classes",
+              ],
+            },
+            {
+              ai: "Thank you. End with a positive note.",
+              keys: ["thank", "positive"],
+              accepts: [
+                "Thank you for listening",
+                "I believe in continuous learning",
+                "Let’s learn and grow",
+              ],
+            },
+          ],
+        },
+        {
+          id: 5,
+          icon: "🗣️",
+          title: "Social Conversations",
+          desc: "Movies, sports, hobbies — keep it alive.",
+          prompts: [
+            {
+              ai: "What kind of movies do you like?",
+              keys: ["movies", "like"],
+              accepts: [
+                "I like action movies",
+                "I enjoy comedies",
+                "I prefer dramas",
+              ],
+            },
+            {
+              ai: "Who is your favorite actor?",
+              keys: ["favorite", "actor"],
+              accepts: [
+                "My favorite actor is *",
+                "I like *",
+                "I enjoy watching *",
+              ],
+            },
+            {
+              ai: "Do you play any sport?",
+              keys: ["sport", "play"],
+              accepts: ["I play cricket", "I go running", "I like football"],
+            },
+            {
+              ai: "What do you do on weekends?",
+              keys: ["weekend"],
+              accepts: ["I relax at home", "I meet friends", "I go for a ride"],
+            },
+            {
+              ai: "Recommend a good series.",
+              keys: ["recommend", "series"],
+              accepts: [
+                "You should watch *",
+                "I recommend *",
+                "Try watching *",
+              ],
+            },
+            {
+              ai: "What is your favorite food?",
+              keys: ["food", "favorite"],
+              accepts: ["I love biryani", "I like pasta", "I enjoy dosa"],
+            },
+            {
+              ai: "Do you like traveling?",
+              keys: ["travel"],
+              accepts: [
+                "Yes, I love traveling",
+                "Sometimes, when I have time",
+                "Not much, I prefer staying home",
+              ],
+            },
+            {
+              ai: "Which place would you love to visit?",
+              keys: ["place", "visit"],
+              accepts: [
+                "I want to visit Japan",
+                "I’d like to see Paris",
+                "I want to go to Kashmir",
+              ],
+            },
+            {
+              ai: "Do you read books?",
+              keys: ["book", "read"],
+              accepts: [
+                "Yes, I read self-help books",
+                "Sometimes, novels",
+                "I prefer podcasts",
+              ],
+            },
+            {
+              ai: "Great talking! Anything you’d like to ask me?",
+              keys: ["ask", "question"],
+              accepts: [
+                "What’s your favorite sport?",
+                "Which city do you like?",
+                "Do you watch movies?",
+              ],
+            },
+          ],
+        },
+        {
+          id: 6,
+          icon: "🎟️",
+          title: "Tickets & Booking",
+          desc: "Quick, natural booking flow.",
+          prompts: [
+            {
+              ai: "How can I help you today?",
+              keys: ["book", "ticket", "help"],
+              accepts: [
+                "I want to book a ticket",
+                "I need two tickets",
+                "I would like to reserve a seat",
+              ],
+            },
+            {
+              ai: "For which date and time?",
+              keys: ["date", "time"],
+              accepts: [
+                "For tomorrow evening",
+                "On Friday at 7 PM",
+                "Next Monday morning",
+              ],
+            },
+            {
+              ai: "How many seats do you need?",
+              keys: ["seat", "how many"],
+              accepts: ["Two seats", "Just one seat", "Three seats please"],
+            },
+            {
+              ai: "Which class or category?",
+              keys: ["class", "category"],
+              accepts: ["Economy class", "Balcony seats", "Gold class"],
+            },
+            {
+              ai: "Do you prefer window or aisle?",
+              keys: ["window", "aisle"],
+              accepts: [
+                "Window seat please",
+                "Aisle seat please",
+                "Any is fine",
+              ],
+            },
+            {
+              ai: "Please confirm your phone number.",
+              keys: ["phone", "number"],
+              accepts: ["My number is *", "It’s *", "You can reach me at *"],
+            },
+            {
+              ai: "Payment method?",
+              keys: ["payment", "cash", "card", "upi"],
+              accepts: ["UPI", "Card payment", "Cash"],
+            },
+            {
+              ai: "Should I send the e-ticket to your email?",
+              keys: ["email", "ticket"],
+              accepts: [
+                "Yes, please email me",
+                "Send it to my email",
+                "Yes, that’s fine",
+              ],
+            },
+            {
+              ai: "Your seats are reserved. Anything else?",
+              keys: ["anything", "else"],
+              accepts: ["That’s all", "No, thank you", "Nothing else"],
+            },
+            {
+              ai: "Thank you. Have a great day!",
+              keys: ["thanks"],
+              accepts: ["Thank you!", "Thanks a lot", "Appreciate it"],
+            },
+          ],
+        },
+        {
+          id: 7,
+          icon: "💼",
+          title: "Interview Simulation",
+          desc: "Fluency, vocabulary, confidence.",
+          prompts: [
+            {
+              ai: "Tell me about yourself.",
+              keys: ["myself", "about"],
+              accepts: [
+                "I’m * from *",
+                "I have experience in *",
+                "I recently completed *",
+              ],
+            },
+            {
+              ai: "Why should we hire you?",
+              keys: ["hire", "why"],
+              accepts: [
+                "I have the skills required",
+                "I can add value to *",
+                "I learn fast and deliver results",
+              ],
+            },
+            {
+              ai: "Describe a challenge and how you solved it.",
+              keys: ["challenge", "solved"],
+              accepts: [
+                "We faced * and I *",
+                "I solved * by *",
+                "I handled * with *",
+              ],
+            },
+            {
+              ai: "What are your career goals?",
+              keys: ["career", "goal"],
+              accepts: [
+                "I want to grow in *",
+                "My goal is to become *",
+                "I aim to lead *",
+              ],
+            },
+            {
+              ai: "How do you handle pressure?",
+              keys: ["pressure", "handle"],
+              accepts: [
+                "I stay calm and plan",
+                "I prioritize tasks",
+                "I ask for help if needed",
+              ],
+            },
+            {
+              ai: "What is your expected salary?",
+              keys: ["salary", "expect"],
+              accepts: [
+                "I’m open to company standards",
+                "Based on market rate",
+                "Negotiable depending on role",
+              ],
+            },
+            {
+              ai: "Any questions for us?",
+              keys: ["question"],
+              accepts: [
+                "What does success look like?",
+                "What is the team structure?",
+                "What are the next steps?",
+              ],
+            },
+            {
+              ai: "When can you join?",
+              keys: ["join", "notice"],
+              accepts: [
+                "I can join immediately",
+                "Two weeks notice",
+                "From next month",
+              ],
+            },
+            {
+              ai: "Share one strength and one weakness.",
+              keys: ["strength", "weakness"],
+              accepts: [
+                "Strength is * and weakness is *",
+                "I am strong in * but need to improve *",
+                "I am good at * and working on *",
+              ],
+            },
+            {
+              ai: "Thank you. We’ll get back to you.",
+              keys: ["thanks"],
+              accepts: [
+                "Thank you for the opportunity",
+                "Thanks for your time",
+                "I appreciate it",
+              ],
+            },
+          ],
+        },
+        {
+          id: 8,
+          icon: "🤝",
+          title: "Negotiation Challenge",
+          desc: "Bargain / persuade politely.",
+          prompts: [
+            {
+              ai: "This phone costs ₹25,000.",
+              keys: ["discount", "price", "deal"],
+              accepts: [
+                "Can you offer a discount?",
+                "Can we make a better deal?",
+                "Is there any offer?",
+              ],
+            },
+            {
+              ai: "We can give you 5% off.",
+              keys: ["okay", "more"],
+              accepts: [
+                "Could you make it 10%?",
+                "Can you reduce a little more?",
+                "Can we do 8%?",
+              ],
+            },
+            {
+              ai: "Free case included.",
+              keys: ["great", "good"],
+              accepts: ["That’s great", "Sounds good", "I appreciate it"],
+            },
+            {
+              ai: "Would you like extended warranty?",
+              keys: ["warranty"],
+              accepts: [
+                "Yes, for one year",
+                "No, that’s fine",
+                "What’s the price?",
+              ],
+            },
+            {
+              ai: "Final price is ₹23,500.",
+              keys: ["agree", "ok"],
+              accepts: ["Okay, I agree", "Deal", "That works for me"],
+            },
+            {
+              ai: "Cash or card?",
+              keys: ["upi", "card", "cash"],
+              accepts: ["UPI", "Card", "I will pay cash"],
+            },
+            {
+              ai: "Would you like home delivery?",
+              keys: ["delivery"],
+              accepts: ["Yes, please", "No, I will pick up", "Maybe tomorrow"],
+            },
+            {
+              ai: "Confirm your address.",
+              keys: ["address"],
+              accepts: ["My address is *", "It’s *", "I live at *"],
+            },
+            {
+              ai: "We’ll deliver by tomorrow.",
+              keys: ["thanks"],
+              accepts: ["Thank you", "Thanks a lot", "Appreciate it"],
+            },
+            {
+              ai: "Anything else?",
+              keys: ["no"],
+              accepts: ["That’s all", "Nothing else", "No, thank you"],
+            },
+          ],
+        },
+        {
+          id: 9,
+          icon: "🚨",
+          title: "City Emergencies",
+          desc: "Police, medical, reporting issues.",
+          prompts: [
+            {
+              ai: "What is your emergency?",
+              keys: ["lost", "accident", "help"],
+              accepts: [
+                "I lost my wallet",
+                "There was an accident",
+                "I need help",
+              ],
+            },
+            {
+              ai: "Where are you right now?",
+              keys: ["where", "location"],
+              accepts: ["I am at *", "Near *", "At the * station"],
+            },
+            {
+              ai: "Is anyone injured?",
+              keys: ["injured", "hurt"],
+              accepts: ["Yes, one person", "No injuries", "I am not sure"],
+            },
+            {
+              ai: "Do you need an ambulance?",
+              keys: ["ambulance"],
+              accepts: [
+                "Yes, send an ambulance",
+                "No, police only",
+                "Yes, immediately",
+              ],
+            },
+            {
+              ai: "Describe the person or vehicle.",
+              keys: ["describe"],
+              accepts: ["A red car *", "A tall person *", "Bike number is *"],
+            },
+            {
+              ai: "When did this happen?",
+              keys: ["when", "time"],
+              accepts: ["Just now", "About ten minutes ago", "Around 5 PM"],
+            },
+            {
+              ai: "We are on the way.",
+              keys: ["okay"],
+              accepts: ["Okay, thank you", "Please come quickly", "Thanks"],
+            },
+            {
+              ai: "Stay on the line.",
+              keys: ["stay", "line"],
+              accepts: ["I will stay on the line", "Okay", "Sure"],
+            },
+            {
+              ai: "Do you feel safe now?",
+              keys: ["safe"],
+              accepts: ["Yes, a little", "Not really", "I am with people"],
+            },
+            {
+              ai: "Help is arriving soon.",
+              keys: ["thanks"],
+              accepts: ["Thank you", "Thanks a lot", "Appreciate it"],
+            },
+          ],
+        },
+        {
+          id: 10,
+          icon: "🗣️",
+          title: "Real Stranger Talk",
+          desc: "Start • continue • close politely.",
+          prompts: [
+            {
+              ai: "Hi! Is this seat taken?",
+              keys: ["seat", "taken"],
+              accepts: [
+                "No, it’s free",
+                "Please sit",
+                "Yes, someone is sitting",
+              ],
+            },
+            {
+              ai: "Thanks! I’m Alex. What’s your name?",
+              keys: ["name"],
+              accepts: ["I’m *", "My name is *", "You can call me *"],
+            },
+            {
+              ai: "Where are you from?",
+              keys: ["from"],
+              accepts: ["I’m from *", "I live in *", "I’m originally from *"],
+            },
+            {
+              ai: "Do you work or study?",
+              keys: ["work", "study"],
+              accepts: [
+                "I work as *",
+                "I’m studying *",
+                "I’m currently learning *",
+              ],
+            },
+            {
+              ai: "What do you like to do in your free time?",
+              keys: ["hobby", "free"],
+              accepts: ["I like *", "I enjoy *", "I love *"],
+            },
+            {
+              ai: "I’m new here. Any cafe suggestions?",
+              keys: ["cafe", "suggest"],
+              accepts: ["Try * cafe", "You can visit *", "* is a good place"],
+            },
+            {
+              ai: "That sounds nice. Want to join now?",
+              keys: ["yes", "no", "maybe"],
+              accepts: ["Sure, let’s go", "Maybe later", "Sorry, I have work"],
+            },
+            {
+              ai: "No worries. It was nice meeting you.",
+              keys: ["nice", "meet"],
+              accepts: [
+                "Nice to meet you too",
+                "Pleasure meeting you",
+                "Likewise",
+              ],
+            },
+            {
+              ai: "Can we connect on social media?",
+              keys: ["connect", "social"],
+              accepts: [
+                "Yes, here is my id",
+                "Sure, I’ll share",
+                "Maybe later",
+              ],
+            },
+            {
+              ai: "Have a great day!",
+              keys: ["thanks", "bye"],
+              accepts: [
+                "Thank you, bye!",
+                "See you, take care",
+                "Have a good day!",
+              ],
+            },
+          ],
+        },
+      ];
+
+      /* =========================
+       BUILD LEVEL CARDS
+       ========================= */
+      const levelsGrid = document.getElementById("levelsGrid");
+      const lockBanner = document.getElementById("lockBanner");
+      const xpEl = document.getElementById("xp");
+      const doneEl = document.getElementById("done");
+      const masterReadyEl = document.getElementById("masterReady");
+      const resetBtn = document.getElementById("resetBtn");
+
+      let profile = loadProfile();
+      if (!oceanCleared()) {
+        lockBanner.classList.remove("hidden");
+        profile.unlocked = Array(LEVEL_COUNT).fill(false);
+        saveProfile(profile);
+      }
+
+      function passNeed(goal = MAX_PER_LEVEL) {
+        return Math.ceil(goal * PASS_RATIO);
+      }
+      function totals(p) {
+        const total = p.perLevelBest
+          .slice(0, LEVEL_COUNT)
+          .reduce((a, b) => a + b, 0);
+        const completed = p.perLevelBest
+          .slice(0, LEVEL_COUNT)
+          .filter((v) => v >= passNeed()).length;
+        return { total, completed };
+      }
+
+      function renderLevels() {
+        const cards = SCENARIOS.map((sc, i) => {
+          const idx = i;
+          const best = profile.perLevelBest[idx] || 0;
+          const unlocked = profile.unlocked[idx] && oceanCleared();
+          const passed = best >= passNeed();
+          if (unlocked && passed && idx + 1 < LEVEL_COUNT)
+            profile.unlocked[idx + 1] = true;
+
+          const lockClass = unlocked ? "" : "lock";
+          const meter = Math.min(100, (best / MAX_PER_LEVEL) * 100);
+          return `
+          <div class="card">
+            <div class="glass p-4 md:p-5 h-full flex flex-col justify-between">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-2xl">${sc.icon}</span>
+                    <h3 class="font-extrabold text-lg md:text-xl">${
+                      sc.title
+                    }</h3>
+                  </div>
+                  <p class="text-sky-100/80 text-sm mt-1">${sc.desc}</p>
+                  <div class="mt-3 meter"><span style="width:${meter}%"></span></div>
+                  <div class="mt-2 text-sm">Best: <b>${best}</b> / ${MAX_PER_LEVEL} XP • Pass ≥ ${passNeed()}</div>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                  <span class="chip">${
+                    unlocked ? (passed ? "Passed" : "Open") : "Locked"
+                  }</span>
+                  <button class="btn ${lockClass}" ${
+            unlocked ? `data-play="${sc.id}"` : ""
+          }>${unlocked ? "Play" : "Locked"}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        }).join("");
+        levelsGrid.innerHTML = cards;
+        saveProfile(profile);
+
+        const t = totals(profile);
+        xpEl.textContent = t.total;
+        doneEl.textContent = `${t.completed}`;
+        masterReadyEl.textContent = t.completed === LEVEL_COUNT ? "Yes" : "No";
+
+        // attach play listeners
+        levelsGrid.querySelectorAll("button[data-play]").forEach((btn) => {
+          btn.addEventListener("click", () =>
+            startLevel(parseInt(btn.dataset.play))
+          );
+        });
+      }
+      renderLevels();
+
+      /* =========================
+       PLAY PANEL STATE
+       ========================= */
+      const playPanel = document.getElementById("playPanel");
+      const playTitle = document.getElementById("playTitle");
+      const levelChip = document.getElementById("levelChip");
+      const goalChip = document.getElementById("goalChip");
+      const needChip = document.getElementById("needChip");
+      const talkEl = document.getElementById("talk");
+      const meterEl = document.getElementById("meter");
+      const bestHereEl = document.getElementById("bestHere");
+      const bestMaxEl = document.getElementById("bestMax");
+      const bestMeter = document.getElementById("bestMeter");
+      const globalXpEl = document.getElementById("globalXp");
+      const turnNoEl = document.getElementById("turnNo");
+      const turnMaxEl = document.getElementById("turnMax");
+      const runXpEl = document.getElementById("runXp");
+      const goalShowEl = document.getElementById("goalShow");
+      const retriesEl = document.getElementById("retries");
+      const passRule = document.getElementById("passRule");
+      const finishBtn = document.getElementById("finishBtn");
+      const ignoreBtn = document.getElementById("ignoreBtn");
+      const simOut = document.getElementById("simOut");
+      const gramOut = document.getElementById("gramOut");
+      const keyOut = document.getElementById("keyOut");
+      const judgeOut = document.getElementById("judgeOut");
+      const textInput = document.getElementById("textInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const micBtn = document.getElementById("micBtn");
+      const micIcon = document.getElementById("micIcon");
+      const hintBtn = document.getElementById("hintBtn");
+      const skipBtn = document.getElementById("skipBtn");
+      const voiceToggle = document.getElementById("voiceToggle");
+      const autoTurn = document.getElementById("autoTurn");
+      const masterGate = document.getElementById("masterGate");
+
+      let current = {
+        levelIdx: 0,
+        turn: 0,
+        goal: MAX_PER_LEVEL,
+        xp: 0,
+        retries: 2,
+        bestBefore: 0,
+        answers: [],
+      };
+
+      bestMaxEl.textContent = MAX_PER_LEVEL;
+      passRule.textContent = passNeed();
+
+      /* =========================
+       UTIL: Add message bubbles
+       ========================= */
+      function addMsg(sender, text) {
+        const row = document.createElement("div");
+        row.className = `flex ${
+          sender === "ai" ? "justify-start" : "justify-end"
+        } items-start`;
+        const b = document.createElement("div");
+        b.className = `bubble ${sender}`;
+        b.innerText = text;
+        row.appendChild(b);
+        talkEl.appendChild(row);
+        talkEl.scrollTop = talkEl.scrollHeight;
+      }
+      function addTyping() {
+        const row = document.createElement("div");
+        row.className = "flex justify-start items-center gap-2 typing";
+        const dot = document.createElement("div");
+        dot.className = "pulse-dot";
+        const text = document.createElement("div");
+        text.className = "text-sm text-sky-100/80";
+        text.innerText = "thinking…";
+        row.appendChild(dot);
+        row.appendChild(text);
+        talkEl.appendChild(row);
+        talkEl.scrollTop = talkEl.scrollHeight;
+        return row;
+      }
+
+      /* =========================
+       Jaro–Winkler Similarity (no external lib)
+       ========================= */
+      function jaroWinkler(s1, s2) {
+        s1 = (s1 || "").toLowerCase().trim();
+        s2 = (s2 || "").toLowerCase().trim();
+        if (!s1 || !s2) return 0;
+        const m = Math.floor(Math.max(s1.length, s2.length) / 2) - 1;
+        let matches = 0,
+          transpositions = 0;
+        const s1Matches = Array(s1.length).fill(false);
+        const s2Matches = Array(s2.length).fill(false);
+        for (let i = 0; i < s1.length; i++) {
+          const start = Math.max(0, i - m),
+            end = Math.min(i + m + 1, s2.length);
+          for (let j = start; j < end; j++) {
+            if (s2Matches[j]) continue;
+            if (s1[i] !== s2[j]) continue;
+            s1Matches[i] = true;
+            s2Matches[j] = true;
+            matches++;
+            break;
+          }
+        }
+        if (matches === 0) return 0;
+        let k = 0;
+        for (let i = 0; i < s1.length; i++) {
+          if (!s1Matches[i]) continue;
+          while (!s2Matches[k]) k++;
+          if (s1[i] !== s2[k]) transpositions++;
+          k++;
+        }
+        transpositions /= 2;
+        const jaro =
+          (matches / s1.length +
+            matches / s2.length +
+            (matches - transpositions) / matches) /
+          3;
+        // Winkler prefix boost
+        let l = 0;
+        while (l < 4 && s1[l] === s2[l]) l++;
+        const p = 0.1;
+        return jaro + l * p * (1 - jaro);
+      }
+
+      /* =========================
+       SIMPLE EVALUATION
+       - similarity against any accepted template
+       - keyword presence
+       - grammar presence (verb + noun)
+       ========================= */
+      function tokenize(s) {
+        return s
+          .toLowerCase()
+          .replace(/[^\w\s]/g, " ")
+          .split(/\s+/)
+          .filter(Boolean);
+      }
+      function hasKeywords(s, keys) {
+        if (!keys || !keys.length) return 0;
+        const t = tokenize(s);
+        let hit = 0;
+        keys.forEach((k) => {
+          const parts = k.split("|");
+          const ok = parts.some((p) => t.includes(p));
+          if (ok) hit++;
+        });
+        return hit / keys.length; // 0..1
+      }
+      function grammarScore(s) {
+        try {
+          const doc = window.nlp(s);
+          const hasVerb = doc.has("#Verb");
+          const hasNoun = doc.has("#Noun");
+          const hasPron = doc.has("#Pronoun");
+          const clauses = doc.sentences().length;
+          let g = 0;
+          if (hasVerb) g += 0.4;
+          if (hasNoun || hasPron) g += 0.4;
+          if (clauses >= 2) g += 0.2;
+          return Math.min(1, g);
+        } catch (e) {
+          return 0.6; // safe default if compromise not ready
+        }
+      }
+      function bestSimilarity(user, accepts) {
+        let best = 0;
+        const clean = (t) => t.toLowerCase().replace(/\*/g, "").trim();
+        accepts.forEach((t) => {
+          const sim = jaroWinkler(clean(user), clean(t));
+          if (sim > best) best = sim;
+        });
+        return best;
+      }
+
+      function judge(user, turn) {
+        const sim = bestSimilarity(user, turn.accepts || []);
+        const key = hasKeywords(user, turn.keys || []);
+        const gram = grammarScore(user);
+        // weighted decision
+        const score = sim * 0.55 + key * 0.25 + gram * 0.2;
+        const passed = score >= 0.7 || (sim >= 0.65 && key >= 0.5);
+        return { sim, key, gram, score, passed };
+      }
+
+      /* =========================
+       SPEECH (Web Speech API)
+       ========================= */
+      const SR =
+        window.SpeechRecognition || window.webkitSpeechRecognition || null;
+      let rec = null,
+        listening = false;
+      function initRec() {
+        if (!SR) return;
+        rec = new SR();
+        rec.lang = "en-US";
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        rec.onresult = (e) => {
+          const text =
+            (e.results[0] && e.results[0][0] && e.results[0][0].transcript) ||
+            "";
+          textInput.value = text;
+          sendNow();
+        };
+        rec.onend = () => {
+          listening = false;
+          micIcon.textContent = "🎙️";
+        };
+      }
+      initRec();
+
+      function ttsSpeak(text) {
+        if (!voiceToggle.checked) return;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 1.03;
+        utter.pitch = 1.0;
+        utter.lang = "en-US";
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utter);
+      }
+
+      /* =========================
+       FLOW
+       ========================= */
+      function startLevel(levelId) {
+        const idx = SCENARIOS.findIndex((s) => s.id === levelId);
+        if (idx < 0) return;
+        current.levelIdx = idx;
+        current.turn = 0;
+        current.goal = MAX_PER_LEVEL;
+        current.xp = 0;
+        current.retries = 2;
+        current.answers = [];
+        current.bestBefore = profile.perLevelBest[idx] || 0;
+
+        const sc = SCENARIOS[idx];
+        playTitle.textContent = `${sc.title} — ${sc.desc}`;
+        levelChip.textContent = `Level ${sc.id}`;
+        goalChip.textContent = `${MAX_PER_LEVEL}`;
+        needChip.textContent = `${passNeed()}`;
+        passRule.textContent = passNeed();
+
+        runXpEl.textContent = current.xp;
+        goalShowEl.textContent = current.goal;
+        bestHereEl.textContent = current.bestBefore;
+        bestMeter.style.width =
+          Math.min(100, (current.bestBefore / current.goal) * 100) + "%";
+
+        const { total } = totals(profile);
+        globalXpEl.textContent = total;
+
+        turnMaxEl.textContent = sc.prompts.length;
+        retriesEl.textContent = current.retries;
+
+        talkEl.innerHTML = "";
+        playPanel.classList.remove("hidden");
+        document.getElementById("levelsGrid").classList.add("hidden");
+
+        // greet
+        addMsg("ai", "Welcome to " + sc.title + ". Let's begin!");
+        setTimeout(() => nextTurn(), 650);
+      }
+
+      document.getElementById("back").addEventListener("click", () => {
+        playPanel.classList.add("hidden");
+        document.getElementById("levelsGrid").classList.remove("hidden");
+      });
+
+      function nextTurn() {
+        const sc = SCENARIOS[current.levelIdx];
+        if (current.turn >= sc.prompts.length) {
+          addMsg(
+            "ai",
+            `Level finished. Your run XP: ${current.xp}/${current.goal}. Click "Finish & Update Score" or "Ignore".`
+          );
+          ttsSpeak("Level finished. Choose to update your score or ignore.");
+          return;
+        }
+        const t = addTyping();
+        setTimeout(() => {
+          t.remove();
+          const turn = sc.prompts[current.turn];
+          addMsg("ai", turn.ai);
+          ttsSpeak(turn.ai);
+          turnNoEl.textContent = current.turn + 1;
+        }, 550);
+      }
+
+      function showEval(res, user) {
+        simOut.textContent = res.sim.toFixed(2);
+        gramOut.textContent = res.gram.toFixed(2);
+        keyOut.textContent = (res.key * 100).toFixed(0) + "%";
+        judgeOut.textContent = res.passed ? "✅ Passed" : "❌ Try again";
+        addMsg("user", user);
+      }
+
+      function applyCorrect() {
+        current.xp += 1;
+        runXpEl.textContent = current.xp;
+        const pct = Math.min(100, (current.xp / current.goal) * 100);
+        meterEl.style.width = pct + "%";
+        addMsg("ai", "✔ Good! +1 XP");
+        ttsSpeak("Good. One point.");
+        current.turn += 1;
+        current.retries = 2;
+        retriesEl.textContent = current.retries;
+        if (autoTurn.checked) setTimeout(() => nextTurn(), 600);
+      }
+      function applyWrong() {
+        current.retries -= 1;
+        retriesEl.textContent = current.retries;
+        if (current.retries <= 0) {
+          addMsg("ai", "✖ Moving on. No XP for this turn.");
+          ttsSpeak("Moving on. No point for this turn.");
+          current.turn += 1;
+          current.retries = 2;
+          retriesEl.textContent = current.retries;
+          setTimeout(() => nextTurn(), 600);
+        } else {
+          addMsg("ai", "Not quite. Try again.");
+          ttsSpeak("Not quite, try again.");
+        }
+      }
+
+      function sendNow() {
+        const user = textInput.value.trim();
+        if (!user) return;
+        const sc = SCENARIOS[current.levelIdx];
+        const turn = sc.prompts[current.turn];
+        const res = judge(user, turn);
+        showEval(res, user);
+        textInput.value = "";
+
+        if (res.passed) {
+          applyCorrect();
+        } else {
+          applyWrong();
+        }
+      }
+
+      sendBtn.addEventListener("click", sendNow);
+      textInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          sendNow();
+        }
+      });
+
+      micBtn.addEventListener("click", () => {
+        if (!rec) {
+          alert(
+            "SpeechRecognition not supported on this browser. Please type your answer."
+          );
+          return;
+        }
+        if (listening) {
+          rec.stop();
+          listening = false;
+          micIcon.textContent = "🎙️";
+        } else {
+          listening = true;
+          micIcon.textContent = "⏹️";
+          rec.start();
+        }
+      });
+
+      hintBtn.addEventListener("click", () => {
+        const sc = SCENARIOS[current.levelIdx];
+        const turn = sc.prompts[current.turn];
+        const hint =
+          turn.accepts && turn.accepts[0]
+            ? turn.accepts[0].replace(/\*/g, "…")
+            : "Try a short, natural sentence.";
+        addMsg("ai", "💡 Hint: " + hint);
+        ttsSpeak("Hint: " + hint.replace(/[^\w\s]/g, ""));
+      });
+
+      skipBtn.addEventListener("click", () => {
+        addMsg("ai", "⏭ Skipped. No XP.");
+        ttsSpeak("Skipped. No point.");
+        current.turn += 1;
+        current.retries = 2;
+        retriesEl.textContent = current.retries;
+        setTimeout(() => nextTurn(), 450);
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key.toLowerCase() === "m") micBtn.click();
+      });
+
+      finishBtn.addEventListener("click", () => {
+        const idx = current.levelIdx;
+        const prevBest = profile.perLevelBest[idx] || 0;
+        const newBest = Math.max(prevBest, current.xp);
+        profile.perLevelBest[idx] = newBest;
+        // unlock next if pass rule met
+        if (newBest >= passNeed() && idx + 1 < LEVEL_COUNT) {
+          profile.unlocked[idx + 1] = true;
+        }
+        saveProfile(profile);
+        bestHereEl.textContent = newBest;
+        bestMeter.style.width =
+          Math.min(100, (newBest / current.goal) * 100) + "%";
+        const { total, completed } = totals(profile);
+        globalXpEl.textContent = total;
+        renderLevels();
+        addMsg(
+          "ai",
+          `✅ Score updated. Best for this level: ${newBest}/${current.goal}.`
+        );
+        ttsSpeak("Score updated.");
+        // show master gate if all complete
+        if (completed === LEVEL_COUNT) {
+          masterGate.classList.remove("hidden");
+        }
+      });
+
+      ignoreBtn.addEventListener("click", () => {
+        addMsg("ai", "⏳ Ignored this run. Best remains the same.");
+        ttsSpeak("Ignored. Best remains the same.");
+      });
+
+      resetBtn.addEventListener("click", () => {
+        if (!confirm("Reset City progress?")) return;
+        localStorage.setItem(CITY_KEY, JSON.stringify(freshProfile()));
+        profile = loadProfile();
+        renderLevels();
+        location.reload();
+      });
+
+      /* =========================
+       INITIAL MASTER NOTICE
+       ========================= */
+      (function initMasterGate() {
+        const { completed } = totals(profile);
+        if (completed === LEVEL_COUNT) masterGate.classList.remove("hidden");
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌲 Forest Quest - Region Levels</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Quicksand:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        /* background: url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1974&auto=format&fit=crop") */
+        /* no-repeat center center/cover; */
+        background-image: url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+        background-size: cover;
+        font-family: "Quicksand", sans-serif;
+        color: #ecfdf5;
+        overflow-x: hidden;
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(3px);
+        z-index: 0;
+      }
+      .title {
+        font-family: "Press Start 2P", cursive;
+        text-shadow: 0 0 8px #10b981;
+      }
+      .card {
+        background: rgba(6, 78, 59, 0.8);
+        border: 2px solid rgba(16, 185, 129, 0.4);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .card:hover {
+        transform: translateY(-6px) scale(1.03);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+      }
+      .locked {
+        filter: grayscale(100%);
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn {
+        background: linear-gradient(145deg, #34d399, #059669);
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.85rem;
+        font-weight: 700;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #fff;
+        border: none;
+        margin-bottom: 1rem;
+        margin-top: 0.5rem;
+        cursor: pointer;
+      }
+      .btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <div class="overlay"></div>
+
+    <header class="relative z-10 text-center py-8">
+      <!-- home button in the top right corner t navigate the home page -->
+      <button
+        class="btn act"
+        onclick="window.location.href='game-index.html'"
+        style="float: right; margin: 0 20px; z-index: 1000"
+      >
+        🗺️ Game Menu
+      </button>
+      <h1 class="title text-3xl md:text-4xl text-green-200">🌲 Forest Quest</h1>
+      <p class="mt-2 text-green-100">
+        Explore levels, earn XP, unlock Valley Region
+      </p>
+      <p class="mt-1 text-green-300 text-sm">
+        Current XP: <span id="xp">0</span> | Region:
+        <span id="region">Forest</span>
+      </p>
+      <button class="btn" onclick="goBackToValley()">⬅ Back to Valley</button>
+    </header>
+
+    <main
+      class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 max-w-6xl mx-auto mb-12"
+      id="levelsGrid"
+    >
+      <!-- Cards will be rendered by JS -->
+    </main>
+
+    <footer class="relative z-10 text-center text-green-200 text-sm py-4">
+      © 2025 Forest Quest | Adventure Awaits 🌌
+    </footer>
+
+    <script>
+      const PROFILE_KEY = "fqx_forest_profile_v1";
+      const LEVELS = [
+        {
+          id: 1,
+          title: "Word Hunt 🪵",
+          desc: "Find hidden words in a forest grid.",
+        },
+        {
+          id: 2,
+          title: "Synonym Trail 🌿",
+          desc: "Match words with their synonyms.",
+        },
+        {
+          id: 3,
+          title: "Antonym Quest 🍄",
+          desc: "Choose the opposite meaning word.",
+        },
+        {
+          id: 4,
+          title: "Sentence Builder 🦜",
+          desc: "Rearrange jumbled words correctly.",
+        },
+        {
+          id: 5,
+          title: "Fill the Gaps 🦋",
+          desc: "Complete sentences with right words.",
+        },
+        {
+          id: 6,
+          title: "Conversation with Animals 🐒",
+          desc: "Pick correct replies in dialogues.",
+        },
+        {
+          id: 7,
+          title: "Grammar Traps 🪶",
+          desc: "Spot and fix mistakes in sentences.",
+        },
+        {
+          id: 8,
+          title: "Forest Story Builder 🌳",
+          desc: "Fill missing words in short story.",
+        },
+        {
+          id: 9,
+          title: "Listening Quest 🎧",
+          desc: "Understand sentences by listening.",
+        },
+        {
+          id: 10,
+          title: "🌟 Master Level: Escape Temple",
+          desc: "Mixed challenges. Score ≥7/10 to unlock Valley.",
+        },
+      ];
+
+      function loadProfile() {
+        let raw = localStorage.getItem(PROFILE_KEY);
+        let profile = {
+          perLevelBest: Array(10).fill(0),
+          valleyUnlocked: false,
+        };
+        if (raw) {
+          try {
+            profile = JSON.parse(raw);
+          } catch (e) {}
+        }
+        // Check valley profile for valleyUnlocked
+        let valleyRaw = localStorage.getItem("fqx_progress_valley_v1");
+        if (valleyRaw) {
+          try {
+            let valleyProfile = JSON.parse(valleyRaw);
+            profile.valleyUnlocked = valleyProfile.valleyUnlocked || false;
+          } catch (e) {}
+        }
+        return profile;
+      }
+      function saveProfile(p) {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+      }
+
+      function updateUI() {
+        let profile = loadProfile();
+        let totalXp = profile.perLevelBest.reduce((a, b) => a + b, 0);
+        document.getElementById("xp").innerText = totalXp;
+        document.getElementById("region").innerText = profile.valleyUnlocked
+          ? "Valley"
+          : "Forest";
+
+        const grid = document.getElementById("levelsGrid");
+        grid.innerHTML = "";
+
+        // If valley not unlocked, show all levels as locked/disabled
+        if (!profile.valleyUnlocked) {
+          LEVELS.forEach((lvl) => {
+            grid.innerHTML += `
+              <div class="card locked" id="level${lvl.id}">
+                <h2 class="font-bold text-xl text-green-200 mb-2">${lvl.id}. ${lvl.title}</h2>
+                <p class="text-green-100">${lvl.desc}</p>
+                <div class="text-yellow-200 mt-2">🔒 Complete Valley region to unlock Forest!</div>
+              </div>
+            `;
+          });
+          return;
+        }
+
+        // Valley unlocked: unlock levels as user completes them (≥7 correct per level)
+        let unlocked = 1;
+        for (let i = 0; i < 10; i++) {
+          if (profile.perLevelBest[i] >= 7) unlocked = i + 2;
+        }
+        LEVELS.forEach((lvl, idx) => {
+          const isLocked = lvl.id > unlocked;
+          grid.innerHTML += `
+            <div class="card${isLocked ? " locked" : ""}" id="level${
+            lvl.id
+          }" onclick="openLevel(${lvl.id})">
+              <h2 class="font-bold text-xl text-green-200 mb-2">${lvl.id}. ${
+            lvl.title
+          }</h2>
+              <p class="text-green-100">${lvl.desc}</p>
+              ${
+                isLocked
+                  ? '<div class="text-yellow-200 mt-2">🔒 Score ≥7 in previous level to unlock.</div>'
+                  : ""
+              }
+            </div>
+          `;
+        });
+      }
+
+      function openLevel(n) {
+        let profile = loadProfile();
+        if (!profile.valleyUnlocked) {
+          alert("🔒 Forest region is locked. Complete Valley region first!");
+          return;
+        }
+        // Check if level is unlocked
+        let unlocked = 1;
+        for (let i = 0; i < 10; i++) {
+          if (profile.perLevelBest[i] >= 7) unlocked = i + 2;
+        }
+        if (n > unlocked) {
+          alert(
+            "🔒 Level is locked. Score at least 7 questions in previous level!"
+          );
+          return;
+        }
+        window.location.href = `forest-levels.html?level=${n}`;
+      }
+
+      function goBackToValley() {
+        window.location.href = "valley.html";
+      }
+
+      // Ensure UI updates after returning from level play
+      window.addEventListener("focus", updateUI);
+      document.addEventListener("visibilitychange", updateUI);
+
+      updateUI();
+    </script>
+  </body>
+</html>

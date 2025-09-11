@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Quicksand:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>FluentQuest - Grammar Puzzle</title>
+    <style>
+      :root {
+        --grad1: #6a11cb;
+        --grad2: #2575fc;
+        --ink: #0b3b66;
+        --card: #f4fbff;
+        --border: #d6eaf7;
+      }
+      /* Global */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        font-family: Arial, Helvetica, sans-serif;
+        color: lab(100% 0.01 -0.01);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      /* ===== HEADER===== */
+      .valley-header {
+        text-align: center;
+        padding: 2.5rem 0 2rem 0;
+        font-family: "Press Start 2P", cursive;
+        text-shadow: 0 0 8px #2575fc;
+      }
+      .valley-title {
+        font-size: 2.2rem;
+        color: #c7eafe;
+        font-family: "Press Start 2P", cursive;
+        margin-bottom: 0.5rem;
+      }
+      .valley-subtitle {
+        font-size: 1.1rem;
+        color: #a7c7f7;
+        font-family: "Quicksand", sans-serif;
+        margin-bottom: 0.3rem;
+      }
+      .valley-meta {
+        font-size: 0.95rem;
+        color: #7fb3e6;
+        font-family: "Quicksand", sans-serif;
+        margin-bottom: 1rem;
+      }
+      .valley-btn {
+        background: linear-gradient(145deg, #34d399, #2575fc);
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.85rem;
+        font-weight: 700;
+        color: #fff;
+        border: none;
+        margin-top: 1rem;
+        cursor: pointer;
+        font-family: "Quicksand", sans-serif;
+        font-size: 1rem;
+        transition: filter 0.2s, transform 0.2s;
+      }
+      .valley-btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+      }
+      /* ===== LEVEL SELECT (first layout) ===== */
+      .levels-screen {
+        text-align: center;
+        width: 100%;
+        max-width: 840px;
+        padding: 24px;
+      }
+      .levels-title {
+        font-size: 3rem;
+        margin: 0 0 24px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.35);
+      }
+      .xp-mini {
+        font-weight: bold;
+        margin-bottom: 16px;
+      }
+      .levels {
+        display: grid;
+        gap: 14px;
+        justify-items: center;
+      }
+
+      /* Responsive grid for levels */
+      @media (max-width: 767px) {
+        .levels {
+          grid-template-columns: 1fr;
+        }
+        body {
+          background: url("phone.jpg") center/cover no-repeat fixed; /* Mobile background */
+        }
+      }
+      @media (min-width: 768px) and (max-width: 1023px) {
+        .levels {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (min-width: 1024px) and (max-width: 1439px) {
+        .levels {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (min-width: 1440px) {
+        .levels {
+          grid-template-columns: repeat(3, 1fr);
+          margin: 10px auto;
+        }
+      }
+      .level-btn {
+        width: 260px;
+        max-width: 90vw;
+        background: #fff;
+        color: #333;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 1.05rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: transform 0.18s, background 0.18s, box-shadow 0.18s;
+      }
+      .level-btn:hover {
+        background: #ffd700;
+        transform: scale(1.04);
+      }
+      .level-btn[disabled] {
+        opacity: 0.55;
+        cursor: not-allowed;
+        background: #eee;
+        color: #666;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      }
+      /* ===== GAME SCREEN ===== */
+      .game-screen {
+        display: none;
+        width: min(1100px, 96vw);
+      }
+      .game-card {
+        background: #eaf2fb;
+        color: #111;
+        border-radius: 16px;
+        box-shadow: 0 14px 38px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        border: 1px solid #cfe1f5;
+      }
+      .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 18px;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+      }
+      .hdr-left {
+        line-height: 1.35;
+        color: black;
+      }
+      .level-name {
+        font-weight: bold;
+        color: #1878f3;
+      }
+      .xp {
+        color: green;
+        font-weight: bold;
+      }
+      .bar-wrap {
+        background: #dfeaf7;
+        height: 8px;
+        border-radius: 20px;
+        overflow: hidden;
+        margin: 10px 18px 0;
+      }
+      .bar {
+        height: 100%;
+        background: #4cafef;
+        width: 0%;
+        transition: width 0.35s;
+      }
+      .subline {
+        color: #0b3b66;
+        font-size: 14px;
+        margin: 8px 18px 0 18px;
+      }
+      .row {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: linear-gradient(180deg, #ffffff 0%, #f3f9ff 100%);
+      }
+      #gameContainer {
+        background: var(--card);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border);
+      }
+      h2 {
+        margin: 6px 0 8px;
+        color: var(--ink);
+      }
+      #sentenceBuilder,
+      #wordBank {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        min-height: 60px;
+        justify-content: center;
+      }
+      #sentenceBuilder {
+        background: #fff;
+        border: 2px dashed #cfe6fb;
+      }
+      #wordBank {
+        background: #fff;
+      }
+      .word-tile {
+        padding: 10px 16px;
+        border-radius: 10px;
+        background: #3b3b3b;
+        color: #fff;
+        cursor: grab;
+        user-select: none;
+        font-weight: bold;
+        transition: transform 0.1s;
+      }
+      .word-tile:nth-child(6n + 1) {
+        background: #3f51b5;
+      }
+      .word-tile:nth-child(6n + 2) {
+        background: #9c27b0;
+      }
+      .word-tile:nth-child(6n + 3) {
+        background: #009688;
+      }
+      .word-tile:nth-child(6n + 4) {
+        background: #ff5722;
+      }
+      .word-tile:nth-child(6n + 5) {
+        background: #795548;
+      }
+      .word-tile:nth-child(6n + 6) {
+        background: #607d8b;
+      }
+      .word-tile:active {
+        transform: scale(1.05);
+      }
+      .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+        justify-content: center;
+      }
+      button.act {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: #fff;
+        background: linear-gradient(90deg, var(--grad1) 0%, var(--grad2) 100%);
+        transition: transform 0.15s;
+        width: 150px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      button.act:hover {
+        transform: translateY(-3px);
+      }
+      .btn-secondary {
+        background: linear-gradient(90deg, #6b7280 0%, #94a3b8 100%);
+      }
+      .row tiny {
+        font-size: 13px;
+        color: #0b3b66;
+      }
+      #hintText {
+        color: #285e8e;
+        margin-top: 10px;
+        font-size: 14px;
+        text-align: center;
+      }
+      .banner {
+        display: none;
+        position: relative;
+        background: #4caf50;
+        color: #fff;
+        padding: 12px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+        margin: 6px auto;
+        width: max(280px, 60%);
+        transform: translateY(-50px);
+        opacity: 0;
+        transition: 0.45s ease;
+      }
+      .banner.show {
+        display: block;
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        color: #0b3b66;
+        margin: 0 18px;
+      }
+      .ghost {
+        background: transparent;
+        border: 2px solid #1878f3;
+        color: #1878f3;
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .btn {
+        background: linear-gradient(145deg, #34d399, #059669);
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.85rem;
+        font-weight: 700;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #fff;
+        border: none;
+        margin-bottom: 1rem;
+        margin-top: 0.5rem;
+        cursor: pointer;
+        outline: none;
+      }
+      .btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+      @media (max-width: 900px) {
+        .levels-title {
+          font-size: 2.4rem;
+        }
+        .game-screen {
+          width: 98vw;
+        }
+        button.act {
+          width: 47%;
+        }
+      }
+
+      /* === Responsive background images (keep this at the END) === */
+      body {
+        background: url("laptop.jpg") center/cover no-repeat fixed;
+      }
+      @media (max-width: 768px) {
+        body {
+          background: url("phone.jpg") center/cover no-repeat fixed;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- home button in the top right corner t navigate the home page -->
+     <button class="btn act" onclick="window.location.href='game-index.html'" style="position: absolute; top: 5px; left: 5px; z-index: 1000;">
+      🗺️ Game Menu 
+    </button>
+    <!-- Add Back to Village button -->
+    <header class="valley-header">
+      <h1 class="valley-title">🏞️ Valley Quest</h1>
+      <p class="valley-subtitle">
+        Grammar Puzzle Adventure — Unlock the Forest!
+      </p>
+      <p class="valley-meta">
+        <div class="xp-mini" id="xpMini">XP: 0</div> | Region:
+        <span id="regionHeader">Valley</span>
+      </p>
+      <button class="valley-btn" id="backToVillage" onclick="goBackToVillage()">
+        ⬅ Back to Village
+      </button>
+    </header>
+
+    <!-- ===== LEVELS SCREEN ===== -->
+    <div class="levels-screen" id="levelsScreen">
+      <h1 class="levels-title">SELECT LEVEL</h1>
+      <div class="levels" id="levelList"></div>
+    </div>
+
+    <!-- ===== GAME SCREEN ===== -->
+    <div class="game-screen" id="gameScreen">
+      <div class="game-card">
+        <div class="game-header">
+          <div class="hdr-left">
+            Grammar Puzzle — <span id="tenseTitle"></span><br />
+            <span class="level-name" id="levelName"></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px">
+            <div class="xp" id="xpDisplay">+0 XP</div>
+            <button class="ghost" id="backBtn">Back to Levels</button>
+          </div>
+        </div>
+
+        <div class="bar-wrap"><div class="bar" id="progressBar"></div></div>
+        <div class="topline">
+          <div id="progressText">Level 1 / 11 — Q 1 / 10</div>
+          <div id="timer" style="color: orange">Time: 60s</div>
+          <div id="attemptDisplay" style="color: red">Attempts Left: 3</div>
+        </div>
+
+        <div class="row">
+          <div id="levelCompleteMessage" class="banner"></div>
+          <div id="allLevelsCompleteMessage" class="banner"></div>
+
+          <div id="gameContainer">
+            <h2>Build the Sentence</h2>
+            <div id="sentenceBuilder">
+              Drag words here to build your sentence
+            </div>
+
+            <div class="controls">
+              <button id="checkAnswerBtn" class="act">Check Answer</button>
+              <button id="hintBtn" class="act btn-secondary">Hint</button>
+              <button id="resetBtn" class="act btn-secondary">Reset</button>
+              <button id="nextBtn" class="act">Next</button>
+            </div>
+
+            <div id="wordBank"></div>
+            <p id="hintText"></p>
+            <tiny>Tip: Click words to toggle between bank and builder.</tiny>
+          </div>
+        </div>
+      </div>
+      <button id="finishLevelBtn" style="display:none;">Finish Level</button>
+    </div>
+
+    <script>
+      // --- Valley unlock logic ---
+      const VILLAGE_KEY = "fqx_progress_village_v1";
+      const VALLEY_KEY = "fqx_progress_valley_v1";
+      const REQUIRED_CORRECT_PER_LEVEL = 7;
+      const MASTER_LEVEL_INDEX = 9; // 0-based index for master level (level 10)
+      const MASTER_UNLOCK_XP = 150;
+      const TOTAL_LEVELS = 11;
+      const DEFAULT_QUESTIONS_PER_LEVEL = 10;
+
+      // --- Valley profile helpers ---
+      function defaultValleyProfile() {
+        return {
+          perLevelBest: Array(TOTAL_LEVELS).fill(0),
+          unlockedLevel: 0,
+          xp: 0,
+          valleyUnlocked: false,
+          lastPlayed: null
+        };
+      }
+      function loadValleyProfile() {
+        try {
+          const raw = localStorage.getItem(VALLEY_KEY);
+          if (!raw) return defaultValleyProfile();
+          const obj = JSON.parse(raw);
+          if (!Array.isArray(obj.perLevelBest) || obj.perLevelBest.length !== TOTAL_LEVELS)
+            obj.perLevelBest = Array(TOTAL_LEVELS).fill(0);
+          if (typeof obj.unlockedLevel !== "number") obj.unlockedLevel = 0;
+          if (typeof obj.xp !== "number") obj.xp = 0;
+          if (typeof obj.valleyUnlocked !== "boolean") obj.valleyUnlocked = false;
+          return obj;
+        } catch (e) {
+          return defaultValleyProfile();
+        }
+      }
+      function saveValleyProfile(profile) {
+        profile.lastPlayed = new Date().toISOString();
+        localStorage.setItem(VALLEY_KEY, JSON.stringify(profile));
+      }
+
+      // --- Village completion check ---
+      function checkVillageCompleted() {
+        try {
+          const raw = localStorage.getItem(VILLAGE_KEY);
+          if (raw) {
+            const profile = JSON.parse(raw);
+            if (
+              profile &&
+              profile.perLevelBest &&
+              profile.perLevelBest.length > MASTER_LEVEL_INDEX &&
+              profile.perLevelBest[MASTER_LEVEL_INDEX] >= REQUIRED_CORRECT_PER_LEVEL
+            ) {
+              return true;
+            }
+          }
+        } catch (e) {}
+        return false;
+      }
+
+      // --- Level unlock logic ---
+      function isLevelUnlocked(level, profile) {
+        if (level === 1) return true;
+        if (level === TOTAL_LEVELS) return profile.xp >= MASTER_UNLOCK_XP && profile.unlockedLevel >= TOTAL_LEVELS - 1;
+        return profile.unlockedLevel >= level - 1;
+      }
+
+      // --- Render Level List ---
+      function renderLevelList() {
+        const profile = loadValleyProfile();
+        const levelListDiv = document.getElementById("levelList");
+        levelListDiv.innerHTML = "";
+
+        // Show region unlock status
+        const regionStatus = checkVillageCompleted()
+          ? "Region: Unlocked"
+          : "Region: Locked";
+        document.getElementById("regionHeader").textContent = "Valley (" + regionStatus + ")";
+
+        if (!checkVillageCompleted()) {
+          for (let i = 1; i <= TOTAL_LEVELS; i++) {
+            const btn = document.createElement("button");
+            btn.className = "level-btn";
+            btn.textContent = (i === TOTAL_LEVELS ? "Master Level" : "Level " + i) + " 🔒";
+            btn.setAttribute("disabled", "disabled");
+            levelListDiv.appendChild(btn);
+          }
+          document.getElementById("xpMini").textContent = "XP: 0";
+          return;
+        }
+        for (let i = 1; i <= TOTAL_LEVELS; i++) {
+          const btn = document.createElement("button");
+          btn.className = "level-btn";
+          const locked = !isLevelUnlocked(i, profile);
+          const lockBadge = locked ? " 🔒" : "";
+          const masterBadge = i === TOTAL_LEVELS && profile.xp < MASTER_UNLOCK_XP
+            ? ` (Need ${MASTER_UNLOCK_XP} XP)` : "";
+          btn.textContent =
+            (i === TOTAL_LEVELS ? "Master Level" : "Level " + i) +
+            lockBadge + masterBadge;
+          if (locked) btn.setAttribute("disabled", "disabled");
+          btn.addEventListener("click", function () {
+            if (btn.disabled) {
+              if (i === TOTAL_LEVELS && profile.xp < MASTER_UNLOCK_XP) {
+                alert("🔒 Master Level locked. Earn at least " + MASTER_UNLOCK_XP + " XP first.");
+              } else {
+                alert("🔒 Finish the previous level with at least " + REQUIRED_CORRECT_PER_LEVEL + " correct to unlock this level.");
+              }
+              return;
+            }
+            // Switch screens and start the selected level
+            document.getElementById("backToVillage").style.display = "none";
+            document.getElementById("levelsScreen").style.display = "none";
+            document.getElementById("gameScreen").style.display = "block";
+            currentLevel = i;
+            questionIndexInLevel = 0;
+            currentQuestionPool = prepareQuestionPoolForLevel(currentLevel);
+            ensureCorrectInit(currentLevel);
+            loadQuestion(0);
+          });
+          levelListDiv.appendChild(btn);
+        }
+        document.getElementById("xpMini").textContent = "XP: " + profile.xp;
+      }
+
+      // --- Save progress after level completion ---
+      function saveValleyProgress(level, correctCount, xpGained) {
+        let profile = loadValleyProfile();
+        // Update best score for this level
+        if (correctCount > (profile.perLevelBest[level - 1] || 0)) {
+          profile.perLevelBest[level - 1] = correctCount;
+        }
+        // Update XP
+        profile.xp += xpGained;
+        // Unlock next level if eligible
+        if (correctCount >= REQUIRED_CORRECT_PER_LEVEL && profile.unlockedLevel < level) {
+          profile.unlockedLevel = level;
+        }
+        // Unlock forest region if master level completed with at least 7 correct
+        if (level === TOTAL_LEVELS && correctCount >= REQUIRED_CORRECT_PER_LEVEL) {
+          profile.valleyUnlocked = true;
+          // Also update forest profile so forest-index.html sees it
+          let forestRaw = localStorage.getItem("fqx_forest_profile_v1");
+          if (forestRaw) {
+            try {
+              let forestProfile = JSON.parse(forestRaw);
+              forestProfile.valleyUnlocked = true;
+              localStorage.setItem("fqx_forest_profile_v1", JSON.stringify(forestProfile));
+            } catch (e) {}
+          }
+        }
+        saveValleyProfile(profile);
+      }
+
+      // --- After finishing a level, call this ---
+      function onLevelComplete(level, correctCount, xpGained) {
+        saveValleyProgress(level, correctCount, xpGained);
+        renderLevelList();
+      }
+
+      // --- Back to Village button ---
+      function goBackToVillage() {
+        window.location.href = "village-index.html";
+      }
+
+      // --- CONFIG ---
+      const TIME_PER_QUESTION = 60;
+      const MAX_ATTEMPTS = 3;
+
+      // --- QUESTION POOLS ---
+      const level1 = [
+        {
+          tense: "Present Simple",
+          words: ["I", "play", "football", "every", "week"],
+          answer: ["I", "play", "football", "every", "week"],
+          hint: "Habit / routine.",
+        },
+        {
+          tense: "Past Simple",
+          words: ["She", "visited", "Paris", "last", "year"],
+          answer: ["She", "visited", "Paris", "last", "year"],
+          hint: "Finished past action.",
+        },
+        {
+          tense: "Future Simple",
+          words: ["They", "will", "go", "to", "school", "tomorrow"],
+          answer: ["They", "will", "go", "to", "school", "tomorrow"],
+          hint: "Future plan.",
+        },
+        {
+          tense: "Present Continuous",
+          words: ["He", "is", "reading", "a", "book", "now"],
+          answer: ["He", "is", "reading", "a", "book", "now"],
+          hint: "Happening now.",
+        },
+        {
+          tense: "Past Continuous",
+          words: ["I", "was", "watching", "TV", "when", "you", "called"],
+          answer: ["I", "was", "watching", "TV", "when", "you", "called"],
+          hint: "Action in progress in the past.",
+        },
+        {
+          tense: "Present Perfect",
+          words: ["She", "has", "finished", "her", "homework"],
+          answer: ["She", "has", "finished", "her", "homework"],
+          hint: "Past action with result now.",
+        },
+        {
+          tense: "Past Perfect",
+          words: ["They", "had", "left", "before", "I", "arrived"],
+          answer: ["They", "had", "left", "before", "I", "arrived"],
+          hint: "Before another past action.",
+        },
+        {
+          tense: "Future Perfect",
+          words: ["By", "next", "June", "I", "will", "have", "graduated"],
+          answer: ["By", "next", "June", "I", "will", "have", "graduated"],
+          hint: "Completed by a future time.",
+        },
+        {
+          tense: "Present Perfect Continuous",
+          words: ["I", "have", "been", "studying", "for", "two", "hours"],
+          answer: ["I", "have", "been", "studying", "for", "two", "hours"],
+          hint: "Started in past, continues.",
+        },
+        {
+          tense: "Future Continuous",
+          words: [
+            "This",
+            "time",
+            "tomorrow",
+            "we",
+            "will",
+            "be",
+            "traveling",
+          ],
+          answer: [
+            "This",
+            "time",
+            "tomorrow",
+            "we",
+            "will",
+            "be",
+            "traveling",
+          ],
+          hint: "Ongoing at a future time.",
+        },
+      ];
+      const level2 = [
+        {
+          tense: "Noun",
+          words: ["The", "dog", "chased", "the", "cat"],
+          answer: ["The", "dog", "chased", "the", "cat"],
+          hint: "Identify nouns.",
+        },
+        {
+          tense: "Pronoun",
+          words: ["She", "is", "my", "best", "friend"],
+          answer: ["She", "is", "my", "best", "friend"],
+          hint: "Pronoun replaces a noun.",
+        },
+        {
+          tense: "Pronoun",
+          words: ["They", "went", "to", "the", "market"],
+          answer: ["They", "went", "to", "the", "market"],
+          hint: "Plural pronoun.",
+        },
+        {
+          tense: "Noun",
+          words: ["Books", "are", "on", "the", "table"],
+          answer: ["Books", "are", "on", "the", "table"],
+          hint: "Common plural nouns.",
+        },
+        {
+          tense: "Pronoun",
+          words: ["Each", "of", "them", "was", "ready"],
+          answer: ["Each", "of", "them", "was", "ready"],
+          hint: "Distributive pronoun.",
+        },
+        {
+          tense: "Noun",
+          words: ["Happiness", "is", "important", "for", "health"],
+          answer: ["Happiness", "is", "important", "for", "health"],
+          hint: "Abstract noun.",
+        },
+        {
+          tense: "Pronoun",
+          words: ["This", "is", "the", "book", "I", "wanted"],
+          answer: ["This", "is", "the", "book", "I", "wanted"],
+          hint: "Demonstrative + relative.",
+        },
+        {
+          tense: "Noun",
+          words: ["The", "jury", "has", "reached", "a", "verdict"],
+          answer: ["The", "jury", "has", "reached", "a", "verdict"],
+          hint: "Collective noun.",
+        },
+        {
+          tense: "Pronoun",
+          words: ["Whoever", "finishes", "first", "wins"],
+          answer: ["Whoever", "finishes", "first", "wins"],
+          hint: "Indefinite/relative pronoun.",
+        },
+        {
+          tense: "Noun",
+          words: ["Knowledge", "is", "power"],
+          answer: ["Knowledge", "is", "power"],
+          hint: "Abstract nouns as subject and complement.",
+        },
+      ];
+      const level3 = [
+        {
+          tense: "Preposition",
+          words: ["The", "book", "is", "on", "the", "table"],
+          answer: ["The", "book", "is", "on", "the", "table"],
+          hint: "Place preposition.",
+        },
+        {
+          tense: "Preposition",
+          words: ["We", "walked", "to", "school"],
+          answer: ["We", "walked", "to", "school"],
+          hint: "Direction.",
+        },
+        {
+          tense: "Preposition",
+          words: ["She", "arrived", "at", "noon"],
+          answer: ["She", "arrived", "at", "noon"],
+          hint: "Time.",
+        },
+        {
+          tense: "Preposition",
+          words: ["He", "jumped", "over", "the", "fence"],
+          answer: ["He", "jumped", "over", "the", "fence"],
+          hint: "Movement.",
+        },
+        {
+          tense: "Preposition",
+          words: ["They", "moved", "into", "the", "new", "house"],
+          answer: ["They", "moved", "into", "the", "new", "house"],
+          hint: "Change of place.",
+        },
+        {
+          tense: "Preposition",
+          words: ["In", "spite", "of", "the", "rain", "we", "went", "out"],
+          answer: ["In", "spite", "of", "the", "rain", "we", "went", "out"],
+          hint: "Contrast phrase.",
+        },
+        {
+          tense: "Preposition",
+          words: ["He", "acted", "in", "accordance", "with", "the", "rules"],
+          answer: ["He", "acted", "in", "accordance", "with", "the", "rules"],
+          hint: "Multi-word preposition.",
+        },
+        {
+          tense: "Preposition",
+          words: ["She", "is", "good", "at", "math"],
+          answer: ["She", "is", "good", "at", "math"],
+          hint: "Adj + prep.",
+        },
+        {
+          tense: "Preposition",
+          words: ["We", "sat", "beside", "the", "window"],
+          answer: ["We", "sat", "beside", "the", "window"],
+          hint: "Position.",
+        },
+        {
+          tense: "Preposition",
+          words: ["The", "store", "is", "across", "the", "street"],
+          answer: ["The", "store", "is", "across", "the", "street"],
+          hint: "Place.",
+        },
+      ];
+      const level4 = [
+        {
+          tense: "Verb",
+          words: ["I", "eat", "an", "apple"],
+          answer: ["I", "eat", "an", "apple"],
+          hint: "Simple present.",
+        },
+        {
+          tense: "Verb",
+          words: ["They", "play", "in", "the", "garden"],
+          answer: ["They", "play", "in", "the", "garden"],
+          hint: "Verb + place.",
+        },
+        {
+          tense: "Verb",
+          words: ["She", "spoke", "softly"],
+          answer: ["She", "spoke", "softly"],
+          hint: "Past simple + adverb.",
+        },
+        {
+          tense: "Verb",
+          words: ["We", "are", "planning", "a", "trip"],
+          answer: ["We", "are", "planning", "a", "trip"],
+          hint: "Present continuous.",
+        },
+        {
+          tense: "Verb",
+          words: ["He", "has", "finished", "the", "task"],
+          answer: ["He", "has", "finished", "the", "task"],
+          hint: "Present perfect.",
+        },
+        {
+          tense: "Verb",
+          words: ["She", "had", "already", "left", "when", "I", "arrived"],
+          answer: ["She", "had", "already", "left", "when", "I", "arrived"],
+          hint: "Past perfect + clause.",
+        },
+        {
+          tense: "Verb",
+          words: ["By", "noon", "I", "will", "have", "left"],
+          answer: ["By", "noon", "I", "will", "have", "left"],
+          hint: "Future perfect.",
+        },
+        {
+          tense: "Verb",
+          words: ["He", "can", "solve", "the", "problem"],
+          answer: ["He", "can", "solve", "the", "problem"],
+          hint: "Modal + base form.",
+        },
+        {
+          tense: "Verb",
+          words: ["She", "ought", "to", "study", "more"],
+          answer: ["She", "ought", "to", "study", "more"],
+          hint: "Modal phrase.",
+        },
+        {
+          tense: "Verb",
+          words: ["They", "were", "playing", "chess"],
+          answer: ["They", "were", "playing", "chess"],
+          hint: "Past continuous.",
+        },
+      ];
+      const level5 = [
+        {
+          tense: "Comparative",
+          words: ["This", "car", "is", "faster", "than", "that", "one"],
+          answer: ["This", "car", "is", "faster", "than", "that", "one"],
+          hint: "Comparative + than.",
+        },
+        {
+          tense: "Superlative",
+          words: ["She", "is", "the", "tallest", "girl", "in", "class"],
+          answer: ["She", "is", "the", "tallest", "girl", "in", "class"],
+          hint: "The + superlative.",
+        },
+        {
+          tense: "Comparative",
+          words: ["My", "house", "is", "bigger", "than", "yours"],
+          answer: ["My", "house", "is", "bigger", "than", "yours"],
+          hint: "-er + than.",
+        },
+        {
+          tense: "Superlative",
+          words: ["This", "is", "the", "most", "interesting", "book"],
+          answer: ["This", "is", "the", "most", "interesting", "book"],
+          hint: "Most + adjective.",
+        },
+        {
+          tense: "Comparative",
+          words: ["He", "is", "more", "careful", "than", "me"],
+          answer: ["He", "is", "more", "careful", "than", "me"],
+          hint: "More + adj.",
+        },
+        {
+          tense: "Superlative",
+          words: ["It", "was", "the", "worst", "day", "ever"],
+          answer: ["It", "was", "the", "worst", "day", "ever"],
+          hint: "Irregular superlative.",
+        },
+        {
+          tense: "Comparative",
+          words: ["Today", "is", "hotter", "than", "yesterday"],
+          answer: ["Today", "is", "hotter", "than", "yesterday"],
+          hint: "Double consonant + er.",
+        },
+        {
+          tense: "Superlative",
+          words: ["Mount", "Everest", "is", "the", "highest", "mountain"],
+          answer: ["Mount", "Everest", "is", "the", "highest", "mountain"],
+          hint: "Superlative fact.",
+        },
+        {
+          tense: "Comparative",
+          words: [
+            "This",
+            "puzzle",
+            "is",
+            "easier",
+            "than",
+            "the",
+            "last",
+            "one",
+          ],
+          answer: [
+            "This",
+            "puzzle",
+            "is",
+            "easier",
+            "than",
+            "the",
+            "last",
+            "one",
+          ],
+          hint: "-y → -ier.",
+        },
+        {
+          tense: "Superlative",
+          words: ["He", "is", "the", "most", "talented", "player"],
+          answer: ["He", "is", "the", "most", "talented", "player"],
+          hint: "Most + adj.",
+        },
+      ];
+      const level6 = [
+        {
+          tense: "Conjunction",
+          words: ["I", "like", "tea", "and", "coffee"],
+          answer: ["I", "like", "tea", "and", "coffee"],
+          hint: "and → addition.",
+        },
+        {
+          tense: "Conjunction",
+          words: ["He", "came", "but", "left", "early"],
+          answer: ["He", "came", "but", "left", "early"],
+          hint: "but → contrast.",
+        },
+        {
+          tense: "Conjunction",
+          words: ["You", "can", "stay", "or", "go"],
+          answer: ["You", "can", "stay", "or", "go"],
+          hint: "or → choice.",
+        },
+        {
+          tense: "Conjunction",
+          words: ["Because", "it", "rained", "we", "stayed", "home"],
+          answer: ["Because", "it", "rained", "we", "stayed", "home"],
+          hint: "Because clause.",
+        },
+        {
+          tense: "Conjunction",
+          words: ["I", "will", "wait", "until", "you", "arrive"],
+          answer: ["I", "will", "wait", "until", "you", "arrive"],
+          hint: "until → time.",
+        },
+        {
+          tense: "Conjunction",
+          words: ["Although", "he", "was", "tired", "he", "continued"],
+          answer: ["Although", "he", "was", "tired", "he", "continued"],
+          hint: "Although clause.",
+        },
+        {
+          tense: "Conjunction",
+          words: ["She", "studied", "hard", "so", "she", "passed"],
+          answer: ["She", "studied", "hard", "so", "she", "passed"],
+          hint: "so → result.",
+        },
+        {
+          tense: "Conjunction",
+          words: [
+            "If",
+            "you",
+            "had",
+            "told",
+            "me",
+            "I",
+            "would",
+            "have",
+            "helped",
+          ],
+          answer: [
+            "If",
+            "you",
+            "had",
+            "told",
+            "me",
+            "I",
+            "would",
+            "have",
+            "helped",
+          ],
+          hint: "Third conditional.",
+        },
+        {
+          tense: "Conjunction",
+          words: [
+            "No",
+            "sooner",
+            "had",
+            "I",
+            "arrived",
+            "than",
+            "he",
+            "left",
+          ],
+          answer: [
+            "No",
+            "sooner",
+            "had",
+            "I",
+            "arrived",
+            "than",
+            "he",
+            "left",
+          ],
+          hint: "Correlative pair.",
+        },
+        {
+          tense: "Conjunction",
+          words: [
+            "While",
+            "I",
+            "was",
+            "cooking",
+            "she",
+            "set",
+            "the",
+            "table",
+          ],
+          answer: [
+            "While",
+            "I",
+            "was",
+            "cooking",
+            "she",
+            "set",
+            "the",
+            "table",
+          ],
+          hint: "Simultaneous actions.",
+        },
+      ];
+      const level7 = [
+        {
+          tense: "Clause",
+          words: ["I", "know", "that", "he", "is", "honest"],
+          answer: ["I", "know", "that", "he", "is", "honest"],
+          hint: "That-clause.",
+        },
+        {
+          tense: "Clause",
+          words: ["The", "man", "who", "called", "is", "my", "uncle"],
+          answer: ["The", "man", "who", "called", "is", "my", "uncle"],
+          hint: "Relative clause.",
+        },
+        {
+          tense: "Clause",
+          words: ["If", "I", "had", "money", "I", "would", "travel"],
+          answer: ["If", "I", "had", "money", "I", "would", "travel"],
+          hint: "Second conditional.",
+        },
+        {
+          tense: "Clause",
+          words: ["When", "the", "rain", "stops", "we", "will", "leave"],
+          answer: ["When", "the", "rain", "stops", "we", "will", "leave"],
+          hint: "Time clause.",
+        },
+        {
+          tense: "Clause",
+          words: ["Although", "it", "was", "late", "we", "kept", "working"],
+          answer: ["Although", "it", "was", "late", "we", "kept", "working"],
+          hint: "Concession.",
+        },
+        {
+          tense: "Clause",
+          words: ["The", "book", "that", "I", "bought", "was", "expensive"],
+          answer: ["The", "book", "that", "I", "bought", "was", "expensive"],
+          hint: "Defining relative.",
+        },
+        {
+          tense: "Clause",
+          words: ["Because", "she", "was", "ill", "she", "stayed", "home"],
+          answer: ["Because", "she", "was", "ill", "she", "stayed", "home"],
+          hint: "Reason.",
+        },
+        {
+          tense: "Clause",
+          words: ["If", "I", "had", "known", "I", "would", "have", "called"],
+          answer: ["If", "I", "had", "known", "I", "would", "have", "called"],
+          hint: "Third conditional.",
+        },
+        {
+          tense: "Clause",
+          words: ["Wherever", "you", "go", "I", "will", "follow"],
+          answer: ["Wherever", "you", "go", "I", "will", "follow"],
+          hint: "Subordinator ‘wherever’.",
+        },
+        {
+          tense: "Clause",
+          words: [
+            "He",
+            "works",
+            "hard",
+            "so",
+            "that",
+            "he",
+            "can",
+            "succeed",
+          ],
+          answer: [
+            "He",
+            "works",
+            "hard",
+            "so",
+            "that",
+            "he",
+            "can",
+            "succeed",
+          ],
+          hint: "Purpose clause.",
+        },
+      ];
+      const level8 = [
+        {
+          tense: "Adjective",
+          words: ["The", "red", "apple", "is", "sweet"],
+          answer: ["The", "red", "apple", "is", "sweet"],
+          hint: "Adjective before noun.",
+        },
+        {
+          tense: "Adverb",
+          words: ["He", "runs", "fast"],
+          answer: ["He", "runs", "fast"],
+          hint: "Manner adverb.",
+        },
+        {
+          tense: "Adjective",
+          words: ["She", "has", "a", "big", "house"],
+          answer: ["She", "has", "a", "big", "house"],
+          hint: "Size adjective.",
+        },
+        {
+          tense: "Adverb",
+          words: ["They", "hardly", "ever", "argue"],
+          answer: ["They", "hardly", "ever", "argue"],
+          hint: "Frequency adverb.",
+        },
+        {
+          tense: "Adjective",
+          words: ["This", "is", "the", "most", "beautiful", "painting"],
+          answer: ["This", "is", "the", "most", "beautiful", "painting"],
+          hint: "Superlative with adj.",
+        },
+        {
+          tense: "Adverb",
+          words: ["She", "spoke", "softly", "to", "the", "child"],
+          answer: ["She", "spoke", "softly", "to", "the", "child"],
+          hint: "Manner + prepositional phrase.",
+        },
+        {
+          tense: "Adjective",
+          words: ["That", "is", "an", "interesting", "story"],
+          answer: ["That", "is", "an", "interesting", "story"],
+          hint: "Opinion adjective.",
+        },
+        {
+          tense: "Adverb",
+          words: ["He", "almost", "missed", "the", "bus"],
+          answer: ["He", "almost", "missed", "the", "bus"],
+          hint: "Degree adverb.",
+        },
+        {
+          tense: "Adjective",
+          words: ["The", "blue", "car", "stopped"],
+          answer: ["The", "blue", "car", "stopped"],
+          hint: "Color adjective.",
+        },
+        {
+          tense: "Adverb",
+          words: ["Please", "drive", "carefully"],
+          answer: ["Please", "drive", "carefully"],
+          hint: "-ly adverb.",
+        },
+      ];
+      const level9 = [
+        {
+          tense: "Active",
+          words: ["The", "boy", "kicked", "the", "ball"],
+          answer: ["The", "boy", "kicked", "the", "ball"],
+          hint: "Active voice.",
+        },
+        {
+          tense: "Passive",
+          words: ["The", "ball", "was", "kicked", "by", "the", "boy"],
+          answer: ["The", "ball", "was", "kicked", "by", "the", "boy"],
+          hint: "be + past participle.",
+        },
+        {
+          tense: "Passive",
+          words: ["The", "cake", "was", "baked", "by", "her"],
+          answer: ["The", "cake", "was", "baked", "by", "her"],
+          hint: "Past passive.",
+        },
+        {
+          tense: "Active",
+          words: ["She", "will", "write", "the", "report"],
+          answer: ["She", "will", "write", "the", "report"],
+          hint: "Future active.",
+        },
+        {
+          tense: "Passive",
+          words: ["The", "report", "will", "be", "written", "tomorrow"],
+          answer: ["The", "report", "will", "be", "written", "tomorrow"],
+          hint: "Future passive.",
+        },
+        {
+          tense: "Passive",
+          words: ["A", "new", "bridge", "is", "being", "built"],
+          answer: ["A", "new", "bridge", "is", "being", "built"],
+          hint: "Present continuous passive.",
+        },
+        {
+          tense: "Active",
+          words: ["People", "speak", "English", "everywhere"],
+          answer: ["People", "speak", "English", "everywhere"],
+          hint: "General subject.",
+        },
+        {
+          tense: "Passive",
+          words: [
+            "All",
+            "the",
+            "windows",
+            "were",
+            "broken",
+            "by",
+            "the",
+            "storm",
+          ],
+          answer: [
+            "All",
+            "the",
+            "windows",
+            "were",
+            "broken",
+            "by",
+            "the",
+            "storm",
+          ],
+          hint: "Agent with by.",
+        },
+        {
+          tense: "Passive",
+          words: ["The", "project", "has", "been", "completed"],
+          answer: ["The", "project", "has", "been", "completed"],
+          hint: "Present perfect passive.",
+        },
+        {
+          tense: "Passive",
+          words: [
+            "Had",
+            "the",
+            "news",
+            "been",
+            "reported",
+            "earlier",
+            "we",
+            "would",
+            "have",
+            "acted",
+          ],
+          answer: [
+            "Had",
+            "the",
+            "news",
+            "been",
+            "reported",
+            "earlier",
+            "we",
+            "would",
+            "have",
+            "acted",
+          ],
+          hint: "Inverted conditional passive.",
+        },
+      ];
+      const level10 = [
+        {
+          tense: "Direct",
+          words: ["She", "said,", '"I', "am", 'tired"'],
+          answer: ["She", "said,", '"I', "am", 'tired"'],
+          hint: "Direct with quotes.",
+        },
+        {
+          tense: "Indirect",
+          words: ["She", "said", "that", "she", "was", "tired"],
+          answer: ["She", "said", "that", "she", "was", "tired"],
+          hint: "Reported statement.",
+        },
+        {
+          tense: "Direct",
+          words: ["Tom", "asked,", '"Where', "are", "you", 'going?"'],
+          answer: ["Tom", "asked,", '"Where', "are", "you", 'going?"'],
+          hint: "Direct question.",
+        },
+        {
+          tense: "Indirect",
+          words: ["Tom", "asked", "where", "I", "was", "going"],
+          answer: ["Tom", "asked", "where", "I", "was", "going"],
+          hint: "Reported question.",
+        },
+        {
+          tense: "Direct",
+          words: ["He", "said,", '"I', "will", "come", 'tomorrow"'],
+          answer: ["He", "said,", '"I', "will", "come", 'tomorrow"'],
+          hint: "Direct future.",
+        },
+        {
+          tense: "Indirect",
+          words: [
+            "He",
+            "said",
+            "that",
+            "he",
+            "would",
+            "come",
+            "the",
+            "next",
+            "day",
+          ],
+          answer: [
+            "He",
+            "said",
+            "that",
+            "he",
+            "would",
+            "come",
+            "the",
+            "next",
+            "day",
+          ],
+          hint: "Backshift to would.",
+        },
+        {
+          tense: "Direct",
+          words: ["She", "said,", '"Buy', "some", 'bread"'],
+          answer: ["She", "said,", '"Buy', "some", 'bread"'],
+          hint: "Imperative direct.",
+        },
+        {
+          tense: "Indirect",
+          words: ["She", "told", "me", "to", "buy", "some", "bread"],
+          answer: ["She", "told", "me", "to", "buy", "some", "bread"],
+          hint: "Infinitive for commands.",
+        },
+        {
+          tense: "Direct",
+          words: [
+            "He",
+            "said,",
+            '"I',
+            "have",
+            "been",
+            "working",
+            "here",
+            "for",
+            "two",
+            'years"',
+          ],
+          answer: [
+            "He",
+            "said,",
+            '"I',
+            "have",
+            "been",
+            "working",
+            "here",
+            "for",
+            "two",
+            'years"',
+          ],
+          hint: "Perfect continuous direct.",
+        },
+        {
+          tense: "Indirect",
+          words: [
+            "He",
+            "said",
+            "that",
+            "he",
+            "had",
+            "been",
+            "working",
+            "there",
+            "for",
+            "two",
+            "years",
+          ],
+          answer: [
+            "He",
+            "said",
+            "that",
+            "he",
+            "had",
+            "been",
+            "working",
+            "there",
+            "for",
+            "two",
+            "years",
+          ],
+          hint: "Reported perfect continuous.",
+        },
+      ];
+      const level11 = [
+        {
+          tense: "Master Mix",
+          words: [
+            "Hardly",
+            "had",
+            "I",
+            "sat",
+            "down",
+            "when",
+            "the",
+            "phone",
+            "rang",
+          ],
+          answer: [
+            "Hardly",
+            "had",
+            "I",
+            "sat",
+            "down",
+            "when",
+            "the",
+            "phone",
+            "rang",
+          ],
+          hint: "Negative adverb + inversion.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "No",
+            "sooner",
+            "had",
+            "she",
+            "left",
+            "than",
+            "it",
+            "started",
+            "raining",
+          ],
+          answer: [
+            "No",
+            "sooner",
+            "had",
+            "she",
+            "left",
+            "than",
+            "it",
+            "started",
+            "raining",
+          ],
+          hint: "No sooner ... than.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "Not",
+            "only",
+            "did",
+            "he",
+            "apologize",
+            "but",
+            "he",
+            "also",
+            "offered",
+            "help",
+          ],
+          answer: [
+            "Not",
+            "only",
+            "did",
+            "he",
+            "apologize",
+            "but",
+            "he",
+            "also",
+            "offered",
+            "help",
+          ],
+          hint: "Not only ... but also + inversion.",
+        },
+        {
+          tense: "Master Mix",
+          words: ["Were", "I", "you", "I", "would", "rethink", "the", "plan"],
+          answer: [
+            "Were",
+            "I",
+            "you",
+            "I",
+            "would",
+            "rethink",
+            "the",
+            "plan",
+          ],
+          hint: "Subjunctive/inverted conditional.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "Had",
+            "we",
+            "known",
+            "earlier",
+            "we",
+            "would",
+            "have",
+            "acted",
+          ],
+          answer: [
+            "Had",
+            "we",
+            "known",
+            "earlier",
+            "we",
+            "would",
+            "have",
+            "acted",
+          ],
+          hint: "Omit if/third conditional inversion.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "Only",
+            "after",
+            "he",
+            "had",
+            "left",
+            "did",
+            "we",
+            "notice",
+            "the",
+            "mistake",
+          ],
+          answer: [
+            "Only",
+            "after",
+            "he",
+            "had",
+            "left",
+            "did",
+            "we",
+            "notice",
+            "the",
+            "mistake",
+          ],
+          hint: "Only + adverbial → inversion.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "Scarcely",
+            "had",
+            "they",
+            "arrived",
+            "when",
+            "the",
+            "meeting",
+            "began",
+          ],
+          answer: [
+            "Scarcely",
+            "had",
+            "they",
+            "arrived",
+            "when",
+            "the",
+            "meeting",
+            "began",
+          ],
+          hint: "Scarcely ... when.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "It",
+            "was",
+            "the",
+            "battery",
+            "that",
+            "caused",
+            "the",
+            "problem",
+          ],
+          answer: [
+            "It",
+            "was",
+            "the",
+            "battery",
+            "that",
+            "caused",
+            "the",
+            "problem",
+          ],
+          hint: "Cleft sentence.",
+        },
+        {
+          tense: "Master Mix",
+          words: ["What", "I", "need", "is", "a", "little", "more", "time"],
+          answer: ["What", "I", "need", "is", "a", "little", "more", "time"],
+          hint: "Wh-cleft (pseudo-cleft).",
+        },
+        {
+          tense: "Master Mix",
+          words: ["Seldom", "have", "I", "seen", "such", "dedication"],
+          answer: ["Seldom", "have", "I", "seen", "such", "dedication"],
+          hint: "Seldom + inversion.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "By",
+            "the",
+            "time",
+            "she",
+            "arrives",
+            "we",
+            "will",
+            "have",
+            "finished",
+          ],
+          answer: [
+            "By",
+            "the",
+            "time",
+            "she",
+            "arrives",
+            "we",
+            "will",
+            "have",
+            "finished",
+          ],
+          hint: "Future perfect with time clause.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "The",
+            "report",
+            "having",
+            "been",
+            "submitted",
+            "we",
+            "left",
+          ],
+          answer: [
+            "The",
+            "report",
+            "having",
+            "been",
+            "submitted",
+            "we",
+            "left",
+          ],
+          hint: "Absolute participle clause.",
+        },
+        {
+          tense: "Master Mix",
+          words: ["I", "had", "my", "car", "repaired", "yesterday"],
+          answer: ["I", "had", "my", "car", "repaired", "yesterday"],
+          hint: "Causative have.",
+        },
+        {
+          tense: "Master Mix",
+          words: ["She", "suggested", "that", "he", "take", "a", "break"],
+          answer: ["She", "suggested", "that", "he", "take", "a", "break"],
+          hint: "Mandative subjunctive (bare form).",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "Were",
+            "it",
+            "not",
+            "for",
+            "your",
+            "help",
+            "we",
+            "would",
+            "have",
+            "failed",
+          ],
+          answer: [
+            "Were",
+            "it",
+            "not",
+            "for",
+            "your",
+            "help",
+            "we",
+            "would",
+            "have",
+            "failed",
+          ],
+          hint: "But for / Were it not for.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "No",
+            "matter",
+            "how",
+            "hard",
+            "you",
+            "try",
+            "mistakes",
+            "will",
+            "happen",
+          ],
+          answer: [
+            "No",
+            "matter",
+            "how",
+            "hard",
+            "you",
+            "try",
+            "mistakes",
+            "will",
+            "happen",
+          ],
+          hint: "Concessive clause.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "Little",
+            "did",
+            "they",
+            "realize",
+            "what",
+            "was",
+            "at",
+            "stake",
+          ],
+          answer: [
+            "Little",
+            "did",
+            "they",
+            "realize",
+            "what",
+            "was",
+            "at",
+            "stake",
+          ],
+          hint: "Fronted negative adverb + inversion.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "The",
+            "scientist",
+            "to",
+            "whom",
+            "we",
+            "spoke",
+            "was",
+            "optimistic",
+          ],
+          answer: [
+            "The",
+            "scientist",
+            "to",
+            "whom",
+            "we",
+            "spoke",
+            "was",
+            "optimistic",
+          ],
+          hint: "Preposition before relative pronoun.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "Had",
+            "it",
+            "not",
+            "been",
+            "for",
+            "the",
+            "delay",
+            "we",
+            "would",
+            "have",
+            "caught",
+            "the",
+            "train",
+          ],
+          answer: [
+            "Had",
+            "it",
+            "not",
+            "been",
+            "for",
+            "the",
+            "delay",
+            "we",
+            "would",
+            "have",
+            "caught",
+            "the",
+            "train",
+          ],
+          hint: "Counterfactual past.",
+        },
+        {
+          tense: "Master Mix",
+          words: [
+            "Rarely",
+            "do",
+            "opportunities",
+            "like",
+            "this",
+            "present",
+            "themselves",
+          ],
+          answer: [
+            "Rarely",
+            "do",
+            "opportunities",
+            "like",
+            "this",
+            "present",
+            "themselves",
+          ],
+          hint: "Inversion with rarely.",
+        },
+      ];
+
+      /* ===== LEVELS MAP ===== */
+      const LEVELS = {
+        1: level1,
+        2: level2,
+        3: level3,
+        4: level4,
+        5: level5,
+        6: level6,
+        7: level7,
+        8: level8,
+        9: level9,
+        10: level10,
+        11: level11,
+      };
+
+      /* ===== helpers for per-level counts ===== */
+      function getQuestionsPerLevel(level) {
+        return level === 11 ? 20 : DEFAULT_QUESTIONS_PER_LEVEL;
+      }
+      function totalQuestionsAllLevels() {
+        let s = 0;
+        for (let i = 1; i <= TOTAL_LEVELS; i++) s += getQuestionsPerLevel(i);
+        return s;
+      }
+      function questionsBeforeLevel(level) {
+        let s = 0;
+        for (let i = 1; i < level; i++) s += getQuestionsPerLevel(i);
+        return s;
+      }
+
+      function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      function prepareQuestionPoolForLevel(level) {
+        const needed = getQuestionsPerLevel(level);
+        const base = (LEVELS[level] || []).slice(0, needed);
+        const n = base.length,
+          e = Math.floor(n * 0.4),
+          m = Math.floor(n * 0.3);
+        const easy = base.slice(0, e),
+          moderate = base.slice(e, e + m),
+          hard = base.slice(e + m);
+        shuffle(easy);
+        shuffle(moderate);
+        shuffle(hard);
+        return [...easy, ...moderate, ...hard];
+      }
+
+      /* ===== GAME STATE & DOM ===== */
+      let currentLevel = 1;
+      let questionIndexInLevel = 0;
+      let currentQuestionPool = [];
+      let currentSentence = null;
+      let currentBuilt = [];
+      let timerInterval = null;
+      let timeLeft = TIME_PER_QUESTION;
+      let xp = 0;
+      let attemptCount = 0;
+      const questionStatus = {};
+      const perLevelCorrect = {};
+      const unlockedLevels = new Set([1]); // Level 1 unlocked initially
+
+      // DOM refs
+      const sentenceBuilder = document.getElementById("sentenceBuilder");
+      const wordBank = document.getElementById("wordBank");
+      const hintText = document.getElementById("hintText");
+      const tenseTitle = document.getElementById("tenseTitle");
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      const timerDisplay = document.getElementById("timer");
+      const xpDisplay = document.getElementById("xpDisplay");
+      const xpMini = document.getElementById("xpMini");
+      const attemptDisplay = document.getElementById("attemptDisplay");
+      const levelNameDisplay = document.getElementById("levelName");
+      const levelListDiv = document.getElementById("levelList");
+      const levelsScreen = document.getElementById("levelsScreen");
+      const gameScreen = document.getElementById("gameScreen");
+      const backBtn = document.getElementById("backBtn");
+
+      function qid(l, i) {
+        return l + "-" + i;
+      }
+      function ensureStatus(l, i) {
+        const id = qid(l, i);
+        if (!questionStatus[id])
+          questionStatus[id] = {
+            attempted: false,
+            xpEligible: true,
+            levelComplete: false,
+          };
+        return id;
+      }
+      function ensureCorrectInit(l) {
+        if (!(l in perLevelCorrect)) perLevelCorrect[l] = 0;
+      }
+
+      function startTimer(reset) {
+        clearInterval(timerInterval);
+        if (reset) timeLeft = TIME_PER_QUESTION;
+        timerDisplay.textContent = "Time: " + timeLeft + "s";
+        timerInterval = setInterval(function () {
+          timeLeft--;
+          timerDisplay.textContent = "Time: " + timeLeft + "s";
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            const id = ensureStatus(currentLevel, questionIndexInLevel);
+            questionStatus[id].attempted = true;
+            questionStatus[id].xpEligible = false;
+            alert("⏳ Time's up! Moving to next question.");
+            proceedToNext();
+          }
+        }, 1000);
+      }
+
+      /* ====== LEVEL SELECT (first layout) ====== */
+      function getLevelName(level) {
+        const map = {
+          1: "All Tenses",
+          2: "Nouns & Pronouns",
+          3: "Prepositions",
+          4: "Verbs",
+          5: "Comparatives & Superlatives",
+          6: "Conjunctions & Compound Sentences",
+          7: "Complex Sentences & Clauses",
+          8: "Adjectives & Adverbs",
+          9: "Active & Passive Voice",
+          10: "Direct & Indirect Speech",
+          11: "Master Level — Tough 20",
+        };
+        return map[level] || "Level " + level;
+      }
+
+      function isLevelActuallyUnlocked(i) {
+        const profile = loadValleyProfile();
+        if (i === 1) return true;
+        if (i === TOTAL_LEVELS) return profile.xp >= MASTER_UNLOCK_XP && profile.unlockedLevel >= TOTAL_LEVELS - 1;
+        return profile.unlockedLevel >= i - 1;
+      }
+
+      function renderLevelList() {
+        const profile = loadValleyProfile();
+        const levelListDiv = document.getElementById("levelList");
+        levelListDiv.innerHTML = "";
+
+        // Show region unlock status
+        const regionStatus = checkVillageCompleted()
+          ? "Region: Unlocked"
+          : "Region: Locked";
+        document.getElementById("regionHeader").textContent = "Valley (" + regionStatus + ")";
+
+        if (!checkVillageCompleted()) {
+          for (let i = 1; i <= TOTAL_LEVELS; i++) {
+            const btn = document.createElement("button");
+            btn.className = "level-btn";
+            btn.textContent = (i === TOTAL_LEVELS ? "Master Level" : "Level " + i) + " 🔒";
+            btn.setAttribute("disabled", "disabled");
+            levelListDiv.appendChild(btn);
+          }
+          document.getElementById("xpMini").textContent = "XP: 0";
+          return;
+        }
+        for (let i = 1; i <= TOTAL_LEVELS; i++) {
+          const btn = document.createElement("button");
+          btn.className = "level-btn";
+          const locked = !isLevelActuallyUnlocked(i);
+          const lockBadge = locked ? " 🔒" : "";
+          const masterBadge = i === TOTAL_LEVELS && profile.xp < MASTER_UNLOCK_XP
+            ? ` (Need ${MASTER_UNLOCK_XP} XP)` : "";
+          btn.textContent =
+            (i === TOTAL_LEVELS ? "Master Level" : "Level " + i) +
+            lockBadge + masterBadge;
+          if (locked) btn.setAttribute("disabled", "disabled");
+          btn.addEventListener("click", function () {
+            if (btn.disabled) {
+              if (i === TOTAL_LEVELS && profile.xp < MASTER_UNLOCK_XP) {
+                alert("🔒 Master Level locked. Earn at least " + MASTER_UNLOCK_XP + " XP first.");
+              } else {
+                alert("🔒 Finish the previous level with at least " + REQUIRED_CORRECT_PER_LEVEL + " correct to unlock this level.");
+              }
+              return;
+            }
+            // Switch screens and start the selected level
+            document.getElementById("backToVillage").style.display = "none";
+            document.getElementById("levelsScreen").style.display = "none";
+            document.getElementById("gameScreen").style.display = "block";
+            currentLevel = i;
+            questionIndexInLevel = 0;
+            currentQuestionPool = prepareQuestionPoolForLevel(currentLevel);
+            ensureCorrectInit(currentLevel);
+            loadQuestion(0);
+          });
+          levelListDiv.appendChild(btn);
+        }
+        document.getElementById("xpMini").textContent = "XP: " + profile.xp;
+      }
+
+      /* ====== Game rendering ====== */
+      // renderBankAndBuilder now accepts a flag whether to reset attemptCount (default true)
+      function renderBankAndBuilder(resetAttempts = true) {
+        sentenceBuilder.innerHTML = "Drag words here to build your sentence";
+        wordBank.innerHTML = "";
+        currentBuilt = [];
+        if (resetAttempts) {
+          attemptCount = 0;
+        }
+        attemptDisplay.textContent =
+          "Attempts Left: " + (MAX_ATTEMPTS - attemptCount);
+        const bankWords = shuffle(currentSentence.words.slice());
+        bankWords.forEach(function (word) {
+          const tile = document.createElement("div");
+          tile.className = "word-tile";
+          tile.draggable = true;
+          tile.textContent = word;
+
+          tile.addEventListener("dragstart", dragStart);
+          tile.addEventListener("click", function () {
+            moveWordFromBank(word);
+          });
+
+          wordBank.appendChild(tile);
+        });
+        hintText.textContent = "";
+      }
+
+      // restoreBankFromBuilder: moves tiles back to bank but DOES NOT reset attempts.
+      function restoreBankFromBuilder() {
+        const builtTiles = Array.from(sentenceBuilder.children).filter(
+          (n) => !(n.nodeType === 3 && n.textContent.trim() === "")
+        ); // filter
+        // if nothing built (placeholder text), just re-render bank without touching attempts
+        if (
+          builtTiles.length === 0 ||
+          (builtTiles.length === 1 &&
+            builtTiles[0].textContent &&
+            builtTiles[0].textContent.includes("Drag words here"))
+        ) {
+          renderBankAndBuilder(false);
+          return;
+        }
+        // move each built tile text back to bank
+        builtTiles.forEach(function (tile) {
+          const word = tile.textContent;
+          // create back tile
+          const backTile = document.createElement("div");
+          backTile.className = "word-tile";
+          backTile.draggable = true;
+          backTile.textContent = word;
+          backTile.addEventListener("dragstart", dragStart);
+          backTile.addEventListener("click", function () {
+            moveWordFromBank(backTile.textContent);
+          });
+          wordBank.appendChild(backTile);
+        });
+        // clear builder but do not change attemptCount
+        sentenceBuilder.innerHTML = "Drag words here to build your sentence";
+        currentBuilt = [];
+        attemptDisplay.textContent =
+          "Attempts Left: " + (MAX_ATTEMPTS - attemptCount);
+        hintText.textContent = "";
+      }
+
+      function loadQuestion(indexChange) {
+        const perLevelCount = getQuestionsPerLevel(currentLevel);
+        if (typeof indexChange === "number")
+          questionIndexInLevel += indexChange;
+        if (questionIndexInLevel < 0) questionIndexInLevel = 0;
+        if (questionIndexInLevel >= perLevelCount) {
+          proceedToNext();
+          return;
+        }
+
+        currentSentence = currentQuestionPool[questionIndexInLevel];
+        const id = ensureStatus(currentLevel, questionIndexInLevel);
+        ensureCorrectInit(currentLevel);
+        tenseTitle.textContent = currentSentence.tense;
+        levelNameDisplay.textContent = "Topic: " + getLevelName(currentLevel);
+        if (questionStatus[id] && questionStatus[id].levelComplete)
+          questionStatus[id].xpEligible = false;
+
+        // reset attempts for a new question
+        renderBankAndBuilder(true);
+
+        progressText.textContent =
+          "Level " +
+          currentLevel +
+          " / " +
+          TOTAL_LEVELS +
+          " — Q " +
+          (questionIndexInLevel + 1) +
+          " / " +
+          perLevelCount;
+        const overallIndex =
+          questionsBeforeLevel(currentLevel) + questionIndexInLevel;
+        const denom = totalQuestionsAllLevels() - 1 || 1;
+        progressBar.style.width =
+          Math.round((overallIndex / denom) * 100) + "%";
+
+        startTimer(true);
+      }
+
+      /* Drag & drop */
+      function dragStart(e) {
+        e.dataTransfer.setData("text/plain", e.target.textContent);
+      }
+      sentenceBuilder.addEventListener("dragover", function (e) {
+        e.preventDefault();
+      });
+      sentenceBuilder.addEventListener("drop", function (e) {
+        e.preventDefault();
+        const word = e.dataTransfer.getData("text/plain");
+        if (!word) return;
+        moveWordFromBank(word);
+      });
+
+      function moveWordFromBank(word) {
+        const bankTiles = Array.from(wordBank.children);
+        const found = bankTiles.find(function (t) {
+          return t.textContent === word;
+        });
+        if (!found) return;
+
+        const tile = document.createElement("div");
+        tile.className = "word-tile";
+        tile.textContent = word;
+
+        tile.addEventListener("click", function () {
+          const backTile = document.createElement("div");
+          backTile.className = "word-tile";
+          backTile.draggable = true;
+          backTile.textContent = tile.textContent;
+          backTile.addEventListener("dragstart", dragStart);
+          backTile.addEventListener("click", function () {
+            moveWordFromBank(backTile.textContent);
+          });
+          wordBank.appendChild(backTile);
+
+          if (sentenceBuilder.contains(tile))
+            sentenceBuilder.removeChild(tile);
+          const idx = currentBuilt.indexOf(tile.textContent);
+          if (idx !== -1) currentBuilt.splice(idx, 1);
+          attemptDisplay.textContent =
+            "Attempts Left: " + (MAX_ATTEMPTS - attemptCount);
+        });
+
+        sentenceBuilder.appendChild(tile);
+        currentBuilt.push(word);
+        wordBank.removeChild(found);
+      }
+
+      /* Buttons */
+      document
+        .getElementById("checkAnswerBtn")
+        .addEventListener("click", function () {
+          /* empty-check */
+          if (currentBuilt.length === 0) {
+            alert("please fill it");
+            return;
+          }
+          const userAnswer = currentBuilt.slice();
+          const correctAnswer = currentSentence.answer;
+          const id = ensureStatus(currentLevel, questionIndexInLevel);
+          attemptCount++;
+          attemptDisplay.textContent =
+            "Attempts Left: " + (MAX_ATTEMPTS - attemptCount);
+
+          if (JSON.stringify(userAnswer) === JSON.stringify(correctAnswer)) {
+            clearInterval(timerInterval);
+            xp += 2;
+            perLevelCorrect[currentLevel] =
+              (perLevelCorrect[currentLevel] || 0) + 1;
+            xpDisplay.textContent = "+" + xp + " XP";
+            alert("✅ Correct! +2 XP");
+            questionStatus[id].attempted = true;
+            questionStatus[id].xpEligible = false;
+            proceedToNext();
+          } else {
+            if (attemptCount >= MAX_ATTEMPTS) {
+              clearInterval(timerInterval);
+              questionStatus[id].attempted = true;
+              questionStatus[id].xpEligible = false;
+              alert("❌ Out of attempts. Moving to next question.");
+              proceedToNext();
+            } else {
+              alert(
+                "❌ Incorrect! You have " +
+                  (MAX_ATTEMPTS - attemptCount) +
+                  " attempts left."
+              );
+            }
+          }
+        });
+
+      document
+        .getElementById("hintBtn")
+        .addEventListener("click", function () {
+          alert(currentSentence.hint || "No hint available.");
+        });
+
+      // Reset button now restores bank from builder AND DOES NOT reset attempts
+      document
+        .getElementById("resetBtn")
+        .addEventListener("click", function () {
+          restoreBankFromBuilder();
+        });
+
+      document
+        .getElementById("nextBtn")
+        .addEventListener("click", function () {
+          proceedToNext();
+        });
+
+      backBtn.addEventListener("click", function () {
+        clearInterval(timerInterval);
+        gameScreen.style.display = "none";
+        levelsScreen.style.display = "block";
+        document.getElementById("backToVillage").style.display = "block";
+        renderLevelList();
+      });
+
+      /* === Gate helpers === */
+      function markLevelCompleteFlags(level) {
+        const perLevelCount = getQuestionsPerLevel(level);
+        for (let i = 0; i < perLevelCount; i++) {
+          const id = ensureStatus(level, i);
+          questionStatus[id].levelComplete = true;
+          questionStatus[id].xpEligible = false;
+        }
+      }
+      function unlockNextLevelIfEligible(levelJustFinished) {
+        const nextLevel = levelJustFinished + 1;
+        if (nextLevel > TOTAL_LEVELS) return;
+        const got = perLevelCorrect[levelJustFinished] || 0;
+        if (got >= REQUIRED_CORRECT_PER_LEVEL) {
+          unlockedLevels.add(nextLevel);
+        }
+      }
+
+      function proceedToNext() {
+        const perLevelCount = getQuestionsPerLevel(currentLevel);
+        if (questionIndexInLevel + 1 >= perLevelCount) {
+          // Level complete
+          const got = perLevelCorrect[currentLevel] || 0;
+          const xpGained = xp;
+          xp = 0; // reset for next level
+          markLevelCompleteFlags(currentLevel);
+          unlockNextLevelIfEligible(currentLevel);
+          onLevelComplete(currentLevel, got, xpGained);
+          // Show level complete message
+          const msg = document.getElementById("levelCompleteMessage");
+          msg.textContent = "🎉 Level " + currentLevel + " Complete! Correct: " + got + "/" + perLevelCount + " — XP Gained: " + xpGained;
+          msg.classList.add("show");
+          setTimeout(function () {
+            msg.classList.remove("show");
+          }, 3000);
+          // Switch back to levels screen
+          setTimeout(function () {
+            gameScreen.style.display = "none";
+            levelsScreen.style.display = "block";
+            document.getElementById("backToVillage").style.display = "block";
+          }, 3000);
+        } else {
+          loadQuestion(1);
+        }
+      }
+
+      // --- On page load ---
+      document.addEventListener("DOMContentLoaded", function () {
+        renderLevelList();
+        // Load saved progress
+        const profile = loadValleyProfile();
+        xp = profile.xp;
+        for (let l = 1; l <= TOTAL_LEVELS; l++) {
+          if (profile.perLevelBest[l - 1] > 0) {
+            perLevelCorrect[l] = profile.perLevelBest[l - 1];
+            unlockedLevels.add(l);
+          }
+        }
+        for (let l = 1; l <= profile.unlockedLevel; l++) {
+          unlockedLevels.add(l);
+        }
+        if (profile.valleyUnlocked) {
+          unlockedLevels.add(TOTAL_LEVELS);
+        }
+      });
+    </script>
+  </body>
+</html>

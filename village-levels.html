@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Fluency Quest X — Village Region</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Quicksand:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-glow: #34d399;
+        --primary-dark: #064e3b;
+        --bg-dark: #0f172a;
+        --bg-light: #1e293b;
+        --text-light: #e2e8f0;
+        --text-muted: #94a3b8;
+      }
+      body {
+        background-color: var(--bg-dark);
+        font-family: "Quicksand", sans-serif;
+        color: var(--text-light);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .game-header {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(100, 116, 139, 0.3);
+      }
+      .logo {
+        font-family: "Press Start 2P", cursive;
+        color: var(--primary-glow);
+        text-shadow: 0 0 8px var(--primary-glow);
+      }
+      .panel {
+        background: var(--bg-light);
+        border-radius: 1rem;
+        border: 1px solid rgba(100, 116, 139, 0.3);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      }
+      .level-card {
+        background: rgba(45, 55, 72, 0.7);
+        transition: all 0.2s ease;
+        border-left: 4px solid transparent;
+      }
+      .level-card:hover {
+        background: rgba(55, 65, 82, 1);
+        border-left-color: var(--primary-glow);
+        transform: translateX(5px);
+      }
+      .level-card.active {
+        background: rgba(16, 185, 129, 0.2);
+        border-left-color: var(--primary-glow);
+      }
+      .level-locked {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .level-locked:hover {
+        transform: none;
+        border-left-color: transparent;
+      }
+      .scene {
+        border-radius: 1rem;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      }
+      .scene .overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.8) 0%,
+          transparent 60%
+        );
+      }
+      .scene-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 1.5rem;
+        text-shadow: 0 2px 10px #000;
+      }
+      .btn-primary {
+        font-family: "Press Start 2P", cursive;
+        background: linear-gradient(145deg, #34d399, #10b981);
+        color: white;
+        border: none;
+        box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 30px rgba(52, 211, 153, 0.7);
+      }
+      .btn-secondary {
+        background: #374151;
+        border: 1px solid #4b5563;
+        transition: all 0.2s ease;
+      }
+      .btn-secondary:hover {
+        background: #4b5563;
+        border-color: #6b7280;
+      }
+      .opt-btn {
+        background: #2d3748;
+        border: 1px solid #4a5568;
+        transition: all 0.2s ease;
+      }
+      .opt-btn:hover {
+        background: #4a5568;
+        transform: translateY(-4px);
+      }
+      .opt-btn.selected {
+        background: var(--primary-glow);
+        color: var(--primary-dark);
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 15px var(--primary-glow);
+      }
+      .token {
+        background: #2d3748;
+        border: 1px solid #4a5568;
+        user-select: none;
+        transition: all 0.2s ease;
+      }
+      .token.used {
+        opacity: 0.4;
+        transform: scale(0.95);
+      }
+      .modal-content {
+        background: var(--bg-light);
+        border: 1px solid rgba(100, 116, 139, 0.5);
+      }
+      /* Animations */
+      @keyframes slideInUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .animate-slideInUp {
+        animation: slideInUp 0.5s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <!-- HEADER -->
+    <header class="game-header sticky top-0 z-50 p-4">
+      <div
+        class="container mx-auto flex flex-col md:flex-row gap-4 items-center justify-between"
+      >
+        <div class="flex items-center gap-4">
+          <div class="logo text-2xl">FQ-X</div>
+          <div>
+            <h1 class="text-xl font-bold text-white">Village Region</h1>
+            <p class="text-xs text-gray-400">Practice speaking by playing</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="panel p-2 px-4 text-center">
+            <div class="text-xs text-gray-400">TOTAL XP</div>
+            <div id="totalXp" class="text-lg font-bold text-emerald-400">0</div>
+          </div>
+          <div class="panel p-2 px-4 text-center">
+            <div class="text-xs text-gray-400">UNLOCKED</div>
+            <div id="unlockedLabel" class="text-lg font-bold">Level 1</div>
+          </div>
+          <button id="homeBack" class="btn-secondary rounded-lg p-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- GAME SHELL -->
+    <main class="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- LEFT: Level List & Profile -->
+      <aside class="panel lg:col-span-1 space-y-6 p-6">
+        <div>
+          <h2 class="text-lg font-bold text-emerald-400 mb-2">
+            Village Levels
+          </h2>
+          <p class="text-xs text-gray-400">
+            Score ≥7 XP to unlock the next level.
+          </p>
+          <div
+            class="level-list mt-4 space-y-2 max-h-[40vh] overflow-y-auto pr-2"
+            id="levelList"
+          >
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+        <div class="pt-4 border-t border-gray-700">
+          <h3 class="font-bold text-emerald-400 mb-3">Profile Stats</h3>
+          <div class="flex gap-4">
+            <div class="bg-gray-800 p-3 rounded-lg text-center flex-1">
+              <div class="text-2xl">🌟</div>
+              <div>
+                Stars: <span id="profileStars" class="font-bold">0</span>
+              </div>
+            </div>
+            <div class="bg-gray-800 p-3 rounded-lg text-center flex-1">
+              <div class="text-2xl">🔥</div>
+              <div>
+                Streak: <span id="profileStreak" class="font-bold">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT: Play Area -->
+      <section class="lg:col-span-2 space-y-6">
+        <div id="scene" class="scene h-64 bg-cover bg-center">
+          <div class="overlay"></div>
+          <div class="absolute bottom-0 left-0 p-6 text-white">
+            <h2 id="levelTitle" class="scene-title">Level 1 — Village Gate</h2>
+            <p id="levelSubtitle" class="text-gray-300">Simple warm-up</p>
+          </div>
+        </div>
+
+        <div class="task-card panel p-6 space-y-4 animate-slideInUp">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 id="taskHeader" class="text-lg font-bold">
+                Question 1 of 10
+              </h3>
+              <p id="taskSub" class="text-sm text-gray-400">
+                Attempts left:
+                <span id="attemptsLeft" class="font-bold text-white">3</span>
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="text-lg font-bold">
+                XP: <span id="runXp" class="text-emerald-400">0</span>/10
+              </div>
+              <div class="w-40 h-3 bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  id="runXpBar"
+                  class="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="questionArea"
+            class="bg-gray-800 p-4 rounded-lg min-h-[150px]"
+          >
+            <!-- Question content injected here -->
+          </div>
+
+          <div
+            class="flex items-center justify-end gap-3 pt-4 border-t border-gray-700"
+          >
+            <button
+              id="btnSkip"
+              class="btn-secondary font-bold py-2 px-4 rounded-lg"
+            >
+              Skip
+            </button>
+            <button
+              id="btnSubmit"
+              class="btn-primary text-sm py-3 px-6 rounded-lg"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+
+        <div id="endPanel" class="panel p-6" style="display: none">
+          <!-- End panel content here -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal -->
+    <div
+      id="modal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+      style="display: none"
+    >
+      <div
+        class="modal-content p-6 rounded-lg max-w-sm w-full text-center animate-slideInUp"
+      >
+        <h3 class="text-xl font-bold text-emerald-400 mb-2">Level Locked</h3>
+        <p id="modalMsg" class="text-gray-300 mb-6">
+          You must complete the previous level with at least 7 XP to unlock this
+          one.
+        </p>
+        <button onclick="closeModal()" class="btn-primary py-2 px-6 rounded-lg">
+          OK
+        </button>
+      </div>
+    </div>
+
+    <script>
+      /* ---------------------------
+       Persistent profile helpers
+       --------------------------- */
+      const PROFILE_KEY = "fqx_progress_village_v1";
+
+      function defaultProfile() {
+        // unlockedLevel: highest index unlocked (0-based). Start unlocked 0 (level1).
+        // perLevelBest: array of 10 numbers (0..10), best XP committed for each level.
+        return {
+          unlockedLevel: 0,
+          perLevelBest: Array(10).fill(0),
+          valleyUnlocked: false,
+          streak: 0,
+        };
+      }
+
+      function loadProfile() {
+        try {
+          const raw = localStorage.getItem(PROFILE_KEY);
+          if (!raw) return defaultProfile();
+          const obj = JSON.parse(raw);
+          // ensure shape
+          if (
+            !Array.isArray(obj.perLevelBest) ||
+            obj.perLevelBest.length !== 10
+          ) {
+            obj.perLevelBest = Array(10).fill(0);
+          }
+          if (typeof obj.unlockedLevel !== "number") obj.unlockedLevel = 0;
+          if (typeof obj.valleyUnlocked !== "boolean")
+            obj.valleyUnlocked = false;
+          if (typeof obj.streak !== "number") obj.streak = 0;
+          return obj;
+        } catch (e) {
+          return defaultProfile();
+        }
+      }
+
+      function saveProfile(p) {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+      }
+
+      // compute total XP conveniently
+      function totalXPFromProfile(p) {
+        return p.perLevelBest.reduce((a, b) => a + b, 0);
+      }
+
+      let profile = loadProfile();
+
+      /* ---------------------------
+       Level & Questions data
+       --------------------------- */
+
+      // We'll create 10 levels. Each level has 10 question objects.
+      // Question types: "mcq", "fill", "order"
+      // Each question object:
+      // { type:'mcq'|'fill'|'order', prompt:string, hintTamil?:string,
+      //   options?:[], answer: string | number | array }
+      //
+      // - mcq.answer = index of correct option
+      // - fill.answer = string or array of acceptable answers
+      // - order.answer = array of tokens in correct order
+
+      const LEVEL_COUNT = 10; // 9 normal + 1 master as requested (level 10)
+      const QUESTIONS_PER_LEVEL = 10;
+      // Below are thematically relevant questions for the Village region.
+      // They are purposefully simple and beginner friendly, and each level
+      // advances slightly in difficulty.
+
+      const LEVELS = [
+        // Level 1
+        {
+          id: 1,
+          title: "Level 1 — Village Gate",
+          subtitle: "Warm-up: basic words",
+          bg: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=2958d2b0c1a1e6a96f10f4b1d0ef8d3e",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "What is 'village' in Tamil?",
+              hint: "விளக்கம்",
+              options: ["கிராமம்", "ஆறு", "மரம்", "பூமி"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: This is my ___ (village).",
+              hint: "word: village",
+              answer: ["village"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is 'river'?",
+              hint: "ஆறு",
+              options: ["river", "mountain", "house", "tree"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order words: 'is / my / village / this'",
+              tokens: ["is", "my", "village", "this"],
+              answer: ["this", "is", "my", "village"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: The farmer grows ___ (crop). (one word)",
+              hint: "e.g. rice",
+              answer: ["rice", "paddy"],
+            },
+            {
+              type: "mcq",
+              prompt: "Pick the correct: A small house is a ___",
+              hint: "வீடு",
+              options: ["hut", "car", "school", "bridge"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: The ___ flows (ஆறு).",
+              hint: "river",
+              answer: ["river"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is a farmer's tool?",
+              hint: "உபகரணம்",
+              options: ["shovel", "phone", "lamp", "bag"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: Good morning = ___",
+              hint: "greeting",
+              answer: ["good morning", "morning"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose the correct: 'friend' meaning?",
+              hint: "நண்பன்",
+              options: ["friend", "food", "bridge", "well"],
+              answer: 0,
+            },
+          ],
+        },
+
+        // Level 2
+        {
+          id: 2,
+          title: "Level 2 — Rice Fields",
+          subtitle: "Daily life words",
+          bg: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=8f9581e0a68f2d9c3f2b1b5d812f4b0c",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "What do farmers plant in fields?",
+              hint: "crop",
+              options: ["crops", "cars", "books", "chairs"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: We water the ___ (plants).",
+              hint: "plants",
+              answer: ["plants", "crops"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'water / the / plants / we'",
+              tokens: ["water", "the", "plants", "we"],
+              answer: ["we", "water", "the", "plants"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is used to cut grass?",
+              hint: "tool",
+              options: ["sickle", "pen", "phone", "plate"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: Rice grows in ___ (area).",
+              hint: "fields",
+              answer: ["fields", "paddy fields", "paddy"],
+            },
+            {
+              type: "mcq",
+              prompt: "What carries water? (small)",
+              hint: "ஆறு",
+              options: ["stream", "book", "hat", "shoe"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: She is a ___ (female farmer).",
+              hint: "women farmer",
+              answer: ["farmer"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is a village animal?",
+              hint: "farm animal",
+              options: ["goat", "computer", "car", "television"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'harvest / they / will / the'",
+              tokens: ["harvest", "they", "will", "the"],
+              answer: ["they", "will", "harvest", "the"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: Food from field = ___",
+              hint: "one word",
+              answer: ["food", "crops"],
+            },
+          ],
+        },
+
+        // Level 3
+        {
+          id: 3,
+          title: "Level 3 — Wooden Bridge",
+          subtitle: "Sentences & structure",
+          bg: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=1cdb6e0fd3b1f7c9fc3d6f1a6e7b5c2a",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "Choose correct verb: She ___ to school.",
+              hint: "verb",
+              options: ["goes", "go", "going", "gone"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: He ___ a farmer.",
+              hint: "is/am/are",
+              answer: ["is"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'to / goes / school / he'",
+              tokens: ["to", "goes", "school", "he"],
+              answer: ["he", "goes", "to", "school"],
+            },
+            {
+              type: "mcq",
+              prompt: "Pick the correct plural: one ___, two ___",
+              hint: "plural",
+              options: ["sheep/sheep", "cat/cats", "man/men", "child/children"],
+              answer: 1,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: We ___ rice. (present)",
+              hint: "grow",
+              answer: ["grow", "are growing"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose: 'bridge' helps to ___ the river.",
+              hint: "action",
+              options: ["cross", "fly", "paint", "sing"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'the / old / is / bridge'",
+              tokens: ["the", "old", "is", "bridge"],
+              answer: ["the", "bridge", "is", "old"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: They ___ their tools.",
+              hint: "verb",
+              answer: ["clean", "use", "carry"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is a polite word?",
+              hint: "polite",
+              options: ["please", "shout", "steal", "run"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: I ___ happy.",
+              hint: "am",
+              answer: ["am"],
+            },
+          ],
+        },
+
+        // Level 4
+        {
+          id: 4,
+          title: "Level 4 — Forest Path",
+          subtitle: "Describe & speak",
+          bg: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=1666a9b4a9f2b9af4f5f2a1f3e2d4c8a",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "Which describes 'beautiful'?",
+              hint: "அழகான",
+              options: ["beautiful", "ugly", "fast", "old"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: The tree is very ___.",
+              hint: "adjective",
+              answer: ["tall", "big", "beautiful"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'is / the / tree / tall'",
+              tokens: ["is", "the", "tree", "tall"],
+              answer: ["the", "tree", "is", "tall"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is listening action?",
+              hint: "listen",
+              options: ["hear", "paint", "run", "sleep"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: Please ___ (listen).",
+              hint: "listen",
+              answer: ["listen", "hear"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is correct: 'I ___ a story.'",
+              hint: "past/present",
+              options: ["tell", "told", "telly", "tells"],
+              answer: 1,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'a / told / story / he / me'",
+              tokens: ["a", "told", "story", "he", "me"],
+              answer: ["he", "told", "me", "a", "story"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: Birds ___ in the tree.",
+              hint: "verb",
+              answer: ["sing", "sit", "fly"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which asks a question?",
+              hint: "interrogative",
+              options: ["What?", "Yes.", "No.", "Wow!"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: We walk ___ the path.",
+              hint: "preposition",
+              answer: ["on", "along"],
+            },
+          ],
+        },
+
+        // Level 5
+        {
+          id: 5,
+          title: "Level 5 — Meadow",
+          subtitle: "Daily conversation",
+          bg: "https://images.unsplash.com/photo-1454789548928-9efd52dc4031?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=4890b2c7f1b5a2e7d7d2c4f6f5a7b8c9",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "Pick greeting: 'Good ___'?",
+              hint: "time",
+              options: ["morning", "book", "door", "water"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: How are ___?",
+              hint: "you",
+              answer: ["you"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'am / I / fine'",
+              tokens: ["am", "I", "fine"],
+              answer: ["I", "am", "fine"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose correct: I have ___ apples.",
+              hint: "number",
+              options: ["two", "is", "has", "the"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: She ___ happy.",
+              hint: "is/am/are",
+              answer: ["is"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is polite: 'Thank ___'?",
+              hint: "person",
+              options: ["you", "me", "they", "he"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'thank / you / very / much'",
+              tokens: ["thank", "you", "very", "much"],
+              answer: ["thank", "you", "very", "much"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: This food is ___.",
+              hint: "delicious",
+              answer: ["delicious", "tasty"],
+            },
+            {
+              type: "mcq",
+              prompt: "Pick opposite of 'hot'",
+              hint: "temperature",
+              options: ["cold", "warm", "big", "small"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: I ___ to school.",
+              hint: "go/goes",
+              answer: ["go", "goes"],
+            },
+          ],
+        },
+
+        // Level 6
+        {
+          id: 6,
+          title: "Level 6 — Old Well",
+          subtitle: "Grammar & verbs",
+          bg: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=0d7f6fbf6a8b4bcf1f8a3f4a3b2e6c7a",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "Choose past form: 'go' -> ?",
+              hint: "past",
+              options: ["went", "goed", "goes", "gone"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: He ___ the well.",
+              hint: "dug",
+              answer: ["dug", "fetches water", "drew"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'has / the / well / water'",
+              tokens: ["has", "the", "well", "water"],
+              answer: ["the", "well", "has", "water"],
+            },
+            {
+              type: "mcq",
+              prompt: "Pick correct: 'They ___ playing.'",
+              hint: "present",
+              options: ["are", "is", "am", "was"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: I ___ a book yesterday.",
+              hint: "past",
+              answer: ["read", "readed"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which is a helping verb?",
+              hint: "auxiliary",
+              options: ["is", "apple", "table", "dog"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'have / we / done / our / work'",
+              tokens: ["have", "we", "done", "our", "work"],
+              answer: ["we", "have", "done", "our", "work"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: She ___ to school daily.",
+              hint: "goes",
+              answer: ["goes", "go"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose correct pronoun: '___ am happy.'",
+              hint: "I",
+              options: ["I", "You", "They", "We"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: They ___ milk from the cow.",
+              hint: "get",
+              answer: ["get", "take", "collect"],
+            },
+          ],
+        },
+
+        // Level 7
+        {
+          id: 7,
+          title: "Level 7 — Festival Prep",
+          subtitle: "Idioms & phrases",
+          bg: "https://images.unsplash.com/photo-1472289065668-ce650ac443d2?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=8dd0cd9b3c1a6a7e1f2c3d4e5f6a7b8a",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "Meaning of 'celebrate'?",
+              hint: "party",
+              options: ["party", "sleep", "run", "break"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: We light ___ at night.",
+              hint: "lanterns",
+              answer: ["lanterns", "lamps"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'the / light / we / lanterns'",
+              tokens: ["the", "light", "we", "lanterns"],
+              answer: ["we", "light", "the", "lanterns"],
+            },
+            {
+              type: "mcq",
+              prompt: "Pick the polite request",
+              hint: "please",
+              options: [
+                "Could you help, please?",
+                "Help me now!",
+                "Do it!",
+                "Shut up!",
+              ],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: Thank you = ___",
+              hint: "thanks",
+              answer: ["thank you", "thanks"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose correct: 'I will ___ tomorrow.' (help)",
+              hint: "future",
+              options: ["help", "helped", "helps", "helping"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'join / we / will / you'",
+              tokens: ["join", "we", "will", "you"],
+              answer: ["we", "will", "join", "you"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: They ___ drums at night.",
+              hint: "play",
+              answer: ["play", "beat"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose emotion: 'joy' is",
+              hint: "happy",
+              options: ["happiness", "anger", "sadness", "fear"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: We sing and ___.",
+              hint: "dance",
+              answer: ["dance", "dance."],
+            },
+          ],
+        },
+
+        // Level 8
+        {
+          id: 8,
+          title: "Level 8 — Dawn Patrol",
+          subtitle: "Story & comprehension",
+          bg: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=3eed2f5ad5b0d9a7a3f9b6c72b5c6d2a",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "If someone is 'kind', they are:",
+              hint: "good",
+              options: ["helpful", "angry", "rude", "silent"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: He gave me a ___ (gift).",
+              hint: "present",
+              answer: ["gift", "present"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'gave / he / me / a / gift'",
+              tokens: ["gave", "he", "me", "a", "gift"],
+              answer: ["he", "gave", "me", "a", "gift"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose mood: 'calm' means",
+              hint: "peaceful",
+              options: ["peaceful", "loud", "fast", "hungry"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: We ___ slowly to avoid noise.",
+              hint: "walk",
+              answer: ["walk", "move"],
+            },
+            {
+              type: "mcq",
+              prompt: "Pick correct preposition: 'He is ___ the house.'",
+              hint: "in/on/at",
+              options: ["in", "on", "under", "by"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'the / cat / under / is / tree'",
+              tokens: ["the", "cat", "under", "is", "tree"],
+              answer: ["the", "cat", "is", "under", "the", "tree"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: They ___ very early.",
+              hint: "wake",
+              answer: ["wake", "wake up", "woke"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose correct: 'I ___ eat now.'",
+              hint: "want",
+              options: ["want to", "wants to", "wanted to", "want"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: The sun ___ in the east.",
+              hint: "rise",
+              answer: ["rises", "rising", "rise"],
+            },
+          ],
+        },
+
+        // Level 9
+        {
+          id: 9,
+          title: "Level 9 — Sunrise Fields",
+          subtitle: "Complex sentences",
+          bg: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=8f6d9f8c4e2d3b7c1a9b2c3d4e5f6a7b",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "Which is future tense?",
+              hint: "will",
+              options: ["I will go", "I go", "I went", "I gone"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: If it rains, we ___ home.",
+              hint: "will stay",
+              answer: ["will stay", "stay"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'if / rains / it / we / stay'",
+              tokens: ["if", "rains", "it", "we", "stay"],
+              answer: ["if", "it", "rains", "we", "stay"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose contraction: 'do not' = ?",
+              hint: "don't",
+              options: ["don't", "doesn't", "didn't", "do"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: I have ___ my work.",
+              hint: "completed",
+              answer: ["finished", "done", "completed"],
+            },
+            {
+              type: "mcq",
+              prompt: "Which shows ability?",
+              hint: "can",
+              options: ["can", "must", "should", "might"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'able / speak / I / can / English'",
+              tokens: ["able", "speak", "I", "can", "English"],
+              answer: ["I", "can", "speak", "English"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: He ___ the cow yesterday.",
+              hint: "fed",
+              answer: ["fed", "feed"],
+            },
+            {
+              type: "mcq",
+              prompt: "Pick best: 'She speaks ___ English.'",
+              hint: "fluently",
+              options: ["fluently", "fastly", "quickly", "softly"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: We will ___ the harvest soon.",
+              hint: "start",
+              answer: ["start", "collect", "harvest"],
+            },
+          ],
+        },
+
+        // Level 10 (Master)
+        {
+          id: 10,
+          title: "Level 10 — Master (Final)",
+          subtitle: "Integrated mastery test",
+          bg: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=4c6c1f9a8c7f2d3b6a7b8c9d0e1f2a3b",
+          questions: [
+            {
+              type: "mcq",
+              prompt: "Which sentence is correct?",
+              hint: "grammar",
+              options: [
+                "She goes to school every day.",
+                "She go to school.",
+                "She going to school.",
+                "She goed to school.",
+              ],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: The children ___ to play every evening.",
+              hint: "verb",
+              answer: ["love", "like"],
+            },
+            {
+              type: "order",
+              prompt: "Order: 'to / every / go / school / we'",
+              tokens: ["to", "every", "go", "school", "we"],
+              answer: ["we", "go", "to", "school", "every"],
+            },
+            {
+              type: "mcq",
+              prompt: "Pick the best polite phrase",
+              hint: "politeness",
+              options: [
+                "Could I have some water, please?",
+                "Give me water.",
+                "Water now.",
+                "I needs water.",
+              ],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: She ___ the elders respectfully.",
+              hint: "respects",
+              answer: ["respects", "honors"],
+            },
+            {
+              type: "mcq",
+              prompt: "What is 'journey' meaning?",
+              hint: "பயணம்",
+              options: ["trip", "home", "work", "eat"],
+              answer: 0,
+            },
+            {
+              type: "order",
+              prompt: "Order: 'is / the / bridge / old / and / strong'",
+              tokens: ["is", "the", "bridge", "old", "and", "strong"],
+              answer: ["the", "bridge", "is", "old", "and", "strong"],
+            },
+            {
+              type: "fill",
+              prompt: "Fill: Farmers work very ___.",
+              hint: "hard",
+              answer: ["hard"],
+            },
+            {
+              type: "mcq",
+              prompt: "Choose correct: I ___ finished my task.",
+              hint: "past perfect",
+              options: ["have", "had", "has", "having"],
+              answer: 0,
+            },
+            {
+              type: "fill",
+              prompt: "Fill: We will keep practicing to become ___.",
+              hint: "fluent",
+              answer: ["fluent", "better"],
+            },
+          ],
+        },
+      ];
+
+      /* ---------------------------
+       Runtime variables
+       --------------------------- */
+      let currentLevelIndex =
+        profile.unlockedLevel <= 9 ? profile.unlockedLevel : 0; // default start
+      // but if url param ?level=N provided, clamp and set
+      const urlParams = new URLSearchParams(window.location.search);
+      const levelParam = parseInt(urlParams.get("level"), 10);
+      if (Number.isFinite(levelParam) && levelParam >= 1 && levelParam <= 10) {
+        // clamp to unlocked
+        if (levelParam - 1 <= profile.unlockedLevel) {
+          currentLevelIndex = levelParam - 1;
+        } else {
+          // do not allow direct access to higher locked level
+          currentLevelIndex = profile.unlockedLevel;
+        }
+      }
+
+      let questionIdx = 0; // 0..9 within level
+      let attemptsLeft = 3; // attempts left on current question
+      let runXp = 0; // XP earned in this run (0..10)
+      let questionResults = []; // array of objects {correct:boolean, attemptsUsed:number, userAnswer:...}
+      let runLocked = false; // used to disable inputs after finishing run before update/ignore
+
+      /* ---------------------------
+       UI references
+       --------------------------- */
+      const levelListEl = document.getElementById("levelList");
+      const totalXpEl = document.getElementById("totalXp");
+      const unlockedLabelEl = document.getElementById("unlockedLabel");
+      const profileStarsEl = document.getElementById("profileStars");
+      const profileStreakEl = document.getElementById("profileStreak");
+
+      const sceneEl = document.getElementById("scene");
+      const levelTitleEl = document.getElementById("levelTitle");
+      const levelSubtitleEl = document.getElementById("levelSubtitle");
+
+      const taskHeaderEl = document.getElementById("taskHeader");
+      const taskSubEl = document.getElementById("taskSub");
+      const questionAreaEl = document.getElementById("questionArea");
+      const attemptsLeftEl = document.getElementById("attemptsLeft");
+
+      const runXpEl = document.getElementById("runXp");
+      const runXpBarEl = document.getElementById("runXpBar");
+
+      const btnSubmit = document.getElementById("btnSubmit");
+      const btnSkip = document.getElementById("btnSkip");
+
+      const endPanelEl = document.getElementById("endPanel");
+
+      const modalEl = document.getElementById("modal");
+      const modalMsgEl = document.getElementById("modalMsg");
+
+      const homeBackBtn = document.getElementById("homeBack");
+
+      /* ---------------------------
+       Utility helpers
+       --------------------------- */
+      function clamp(n, a, b) {
+        return Math.max(a, Math.min(b, n));
+      }
+      function safeTrim(s) {
+        return String(s || "")
+          .trim()
+          .replace(/[.,!?]/g, "")
+          .toLowerCase();
+      }
+
+      function normalizeAnswer(ans) {
+        if (Array.isArray(ans)) return ans.map((a) => safeTrim(a));
+        return safeTrim(ans);
+      }
+
+      function checkFill(user, answer) {
+        const u = safeTrim(user);
+        if (!u) return false;
+        const a = normalizeAnswer(answer);
+        if (Array.isArray(a)) {
+          return a.some((x) => x === u);
+        }
+        return a === u;
+      }
+
+      function checkOrder(userArray, answerArray) {
+        if (!Array.isArray(userArray) || !Array.isArray(answerArray))
+          return false;
+        // Normalize tokens by trimming lowercasing
+        const ua = userArray.map((t) => safeTrim(t)).filter(Boolean);
+        const aa = answerArray.map((t) => safeTrim(t)).filter(Boolean);
+        if (ua.length !== aa.length) return false;
+        for (let i = 0; i < aa.length; i++) {
+          if (ua[i] !== aa[i]) return false;
+        }
+        return true;
+      }
+
+      /* ---------------------------
+       Profile UI rendering
+       --------------------------- */
+      function renderProfileUI() {
+        totalXpEl.textContent = totalXPFromProfile(profile);
+        unlockedLabelEl.textContent = "Level " + (profile.unlockedLevel + 1);
+        // stars = sum of per-level best divided by ... but we can treat star as XP threshold 7=>1 star, 9=>2, 10=>3 maybe.
+        const stars = profile.perLevelBest.reduce((s, x) => {
+          if (x >= 10) return s + 3;
+          if (x >= 9) return s + 2;
+          if (x >= 7) return s + 1;
+          return s;
+        }, 0);
+        profileStarsEl.textContent = stars;
+        profileStreakEl.textContent = profile.streak || 0;
+      }
+
+      /* ---------------------------
+       Build Level List (left)
+       --------------------------- */
+      function buildLevelList() {
+        levelListEl.innerHTML = "";
+        for (let i = 0; i < LEVEL_COUNT; i++) {
+          const lvl = LEVELS[i];
+          const card = document.createElement("div");
+          card.className =
+            "level-card p-3 rounded-lg flex items-center gap-4 cursor-pointer";
+
+          const locked = i > profile.unlockedLevel;
+          if (locked) card.classList.add("level-locked");
+          if (i === currentLevelIndex) card.classList.add("active");
+
+          const badge = document.createElement("div");
+          badge.className =
+            "w-12 h-12 rounded-md flex items-center justify-center text-xl font-bold";
+          badge.textContent = i === 9 ? "👑" : i + 1;
+          badge.style.background =
+            i === 9
+              ? "linear-gradient(145deg, #fde047, #f59e0b)"
+              : "linear-gradient(145deg, #4ade80, #16a34a)";
+
+          const info = document.createElement("div");
+          info.innerHTML = `<div class="font-bold text-white">${lvl.title
+            .split("—")[1]
+            .trim()}</div><div class="text-xs text-gray-400">${
+            lvl.subtitle
+          }</div>`;
+
+          const right = document.createElement("div");
+          right.className = "ml-auto text-right";
+          const best = profile.perLevelBest[i] || 0;
+          right.innerHTML = `<div class="font-bold text-emerald-400">${best}/10 XP</div><div class="text-xs text-gray-500">Best</div>`;
+
+          card.appendChild(badge);
+          card.appendChild(info);
+          card.appendChild(right);
+
+          (function (idx, lockedFlag) {
+            card.addEventListener("click", (e) => {
+              if (lockedFlag) {
+                showModal(
+                  "Level is locked. Score 7/10 or more on previous levels to unlock."
+                );
+                return;
+              }
+              startLevel(idx);
+            });
+          })(i, locked);
+
+          levelListEl.appendChild(card);
+        }
+      }
+
+      /* ---------------------------
+       Start / Render Level
+       --------------------------- */
+      function startLevel(idx) {
+        currentLevelIndex = idx;
+        questionIdx = 0;
+        attemptsLeft = 3;
+        runXp = 0;
+        questionResults = Array(QUESTIONS_PER_LEVEL)
+          .fill(null)
+          .map(() => ({ correct: false, attemptsUsed: 0, userAnswer: null }));
+        runLocked = false;
+
+        const LV = LEVELS[currentLevelIndex];
+        sceneEl.style.backgroundImage = `url('${LV.bg}')`;
+        levelTitleEl.textContent = LV.title;
+        levelSubtitleEl.textContent = LV.subtitle;
+
+        endPanelEl.style.display = "none";
+        document.querySelector(".task-card").style.display = "block";
+
+        renderQuestion();
+        renderRunUi();
+        buildLevelList(); // To update active state
+      }
+
+      function renderRunUi() {
+        runXpEl.textContent = runXp;
+        runXpBarEl.style.width = runXp * 10 + "%";
+        attemptsLeftEl.textContent = attemptsLeft;
+        taskHeaderEl.textContent = `Question ${
+          questionIdx + 1
+        } of ${QUESTIONS_PER_LEVEL}`;
+        taskSubEl.innerHTML = `Attempts left: <span id="attemptsLeft" class="font-bold text-white">${attemptsLeft}</span>`;
+      }
+
+      /* ---------------------------
+       Render current question UI
+       --------------------------- */
+      function renderQuestion() {
+        const LV = LEVELS[currentLevelIndex];
+        const Q = LV.questions[questionIdx];
+        questionAreaEl.innerHTML = "";
+
+        const qText = document.createElement("div");
+        qText.className = "text-lg font-bold text-white mb-2";
+        qText.textContent = Q.prompt;
+        questionAreaEl.appendChild(qText);
+
+        if (Q.hint) {
+          const hint = document.createElement("div");
+          hint.className = "text-sm text-gray-400 mb-4";
+          hint.textContent = "Hint: " + Q.hint;
+          questionAreaEl.appendChild(hint);
+        }
+
+        if (Q.type === "mcq") {
+          const grid = document.createElement("div");
+          grid.className = "grid grid-cols-1 md:grid-cols-2 gap-3";
+          Q.options.forEach((opt, idx) => {
+            const btn = document.createElement("button");
+            btn.className = "opt-btn p-3 rounded-lg text-left";
+            btn.textContent = opt;
+            btn.dataset.optIndex = idx;
+            btn.addEventListener("click", () => {
+              if (runLocked) return;
+              Array.from(grid.children).forEach((ch) =>
+                ch.classList.remove("selected")
+              );
+              btn.classList.add("selected");
+            });
+            grid.appendChild(btn);
+          });
+          questionAreaEl.appendChild(grid);
+        } else if (Q.type === "fill") {
+          const input = document.createElement("input");
+          input.className =
+            "w-full p-3 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500";
+          input.placeholder = "Type your answer...";
+          input.autocomplete = "off";
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") btnSubmit.click();
+          });
+          questionAreaEl.appendChild(input);
+        } else if (Q.type === "order") {
+          const answerArea = document.createElement("div");
+          answerArea.className =
+            "min-h-[50px] bg-gray-900 p-2 rounded-lg flex flex-wrap gap-2 mb-3";
+
+          const pool = document.createElement("div");
+          pool.className = "flex flex-wrap gap-2";
+          const shuffled = shuffleArray(Q.tokens.slice());
+          shuffled.forEach((tok) => {
+            const t = document.createElement("div");
+            t.className = "token p-2 px-4 rounded-lg cursor-pointer";
+            t.textContent = tok;
+            t.addEventListener("click", () => {
+              if (runLocked || t.classList.contains("used")) return;
+              t.classList.add("used");
+              const chip = document.createElement("div");
+              chip.className = "token p-2 px-4 rounded-lg";
+              chip.textContent = tok;
+              chip.addEventListener("click", () => {
+                t.classList.remove("used");
+                chip.remove();
+              });
+              answerArea.appendChild(chip);
+            });
+            pool.appendChild(t);
+          });
+          questionAreaEl.appendChild(answerArea);
+          questionAreaEl.appendChild(pool);
+        }
+        renderRunUi();
+      }
+
+      /* ---------------------------
+       Submit Answer logic
+       --------------------------- */
+      btnSubmit.addEventListener("click", () => {
+        if (runLocked) return;
+
+        const LV = LEVELS[currentLevelIndex];
+        const Q = LV.questions[questionIdx];
+        let isCorrect = false;
+        let userAnswer = null;
+
+        if (Q.type === "mcq") {
+          const selectedBtn = questionAreaEl.querySelector(".opt-btn.selected");
+          if (!selectedBtn) {
+            showModal("Please select an option.");
+            return;
+          }
+          const selIndex = parseInt(selectedBtn.dataset.optIndex, 10);
+          userAnswer = selIndex;
+          isCorrect = selIndex === Q.answer;
+        } else if (Q.type === "fill") {
+          const inp = questionAreaEl.querySelector("input");
+          if (!inp || !inp.value.trim()) {
+            showModal("Please type an answer.");
+            return;
+          }
+          userAnswer = inp.value.trim();
+          isCorrect = checkFill(userAnswer, Q.answer);
+        } else if (Q.type === "order") {
+          const answerArea = questionAreaEl.querySelector("div");
+          const selectedChips = Array.from(
+            answerArea.querySelectorAll(".token")
+          );
+          if (selectedChips.length === 0) {
+            showModal("Please order the tokens.");
+            return;
+          }
+          const userSeq = selectedChips.map((c) => c.textContent.trim());
+          userAnswer = userSeq;
+          isCorrect = checkOrder(userSeq, Q.answer);
+        }
+
+        if (isCorrect) {
+          questionResults[questionIdx].correct = true;
+          questionResults[questionIdx].attemptsUsed = 3 - attemptsLeft + 1;
+          questionResults[questionIdx].userAnswer = userAnswer;
+          runXp += 1;
+          flashEffect(questionAreaEl, "border-emerald-500");
+          setTimeout(() => moveToNextQuestion(), 700);
+        } else {
+          attemptsLeft -= 1;
+          questionResults[questionIdx].attemptsUsed += 1;
+          flashEffect(questionAreaEl, "border-red-500");
+          if (attemptsLeft > 0) {
+            showTemporary(`Incorrect. ${attemptsLeft} attempts left.`);
+          } else {
+            questionResults[questionIdx].correct = false;
+            questionResults[questionIdx].userAnswer = userAnswer;
+            showTemporary(`Out of attempts. Correct: ${displayAnswer(Q)}`);
+            setTimeout(() => moveToNextQuestion(), 1200);
+          }
+        }
+        renderRunUi();
+      });
+
+      /* ---------------------------
+       Skip / Forfeit question
+       --------------------------- */
+      btnSkip.addEventListener("click", () => {
+        if (runLocked) return;
+        questionResults[questionIdx].correct = false;
+        questionResults[questionIdx].userAnswer = null;
+        questionResults[questionIdx].attemptsUsed = 3;
+        showTemporary("Question skipped.");
+        setTimeout(() => moveToNextQuestion(), 700);
+      });
+
+      /* ---------------------------
+       Move to next question or finish run
+       --------------------------- */
+      function moveToNextQuestion() {
+        attemptsLeft = 3;
+        questionIdx++;
+        if (questionIdx >= QUESTIONS_PER_LEVEL) {
+          finishRun();
+        } else {
+          renderQuestion();
+          renderRunUi();
+        }
+      }
+
+      function finishRun() {
+        runLocked = true;
+        document.querySelector(".task-card").style.display = "none";
+        endPanelEl.style.display = "block";
+        endPanelEl.innerHTML = `
+        <div class="text-center">
+          <h2 class="text-2xl font-bold text-emerald-400">Level Complete!</h2>
+          <p class="text-4xl font-bold my-4">XP: ${runXp} / 10</p>
+          <p class="mb-6">${
+            runXp >= 7
+              ? "🎉 Well done! You passed!"
+              : "Better luck next time. Need 7 XP to pass."
+          }</p>
+          <div class="flex justify-center gap-4">
+            <button id="btnIgnore" class="btn-secondary font-bold py-2 px-6 rounded-lg">Ignore</button>
+            <button id="btnUpdate" class="btn-primary text-sm py-3 px-8 rounded-lg">Save Score</button>
+          </div>
+        </div>
+      `;
+        document.getElementById("btnUpdate").onclick = onUpdateScore;
+        document.getElementById("btnIgnore").onclick = onIgnoreScore;
+      }
+
+      /* ---------------------------
+       Update/Ignore handlers
+       --------------------------- */
+      function onUpdateScore() {
+        const prev = profile.perLevelBest[currentLevelIndex] || 0;
+        if (runXp > prev) {
+          profile.perLevelBest[currentLevelIndex] = runXp;
+        }
+        if (profile.perLevelBest[currentLevelIndex] >= 7) {
+          if (
+            profile.unlockedLevel < currentLevelIndex + 1 &&
+            currentLevelIndex < 9
+          ) {
+            profile.unlockedLevel = Math.min(9, currentLevelIndex + 1);
+          }
+        }
+        if (currentLevelIndex === 9 && profile.perLevelBest[9] >= 7) {
+          profile.valleyUnlocked = true;
+        }
+        profile.streak = (profile.streak || 0) + 1;
+        saveProfile(profile);
+
+        buildLevelList();
+        renderProfileUI();
+        showModal(
+          `Score updated! Your best is ${profile.perLevelBest[currentLevelIndex]} XP.`
+        );
+        resetRun();
+      }
+
+      function onIgnoreScore() {
+        showModal("Run ignored. No changes saved.");
+        resetRun();
+      }
+
+      /* ---------------------------
+       Reset run to base state
+       --------------------------- */
+      function resetRun() {
+        endPanelEl.style.display = "none";
+        document.querySelector(".task-card").style.display = "block";
+        startLevel(currentLevelIndex);
+      }
+
+      /* ---------------------------
+       Display helpers
+       --------------------------- */
+      function showModal(msg) {
+        modalMsgEl.textContent = msg;
+        modalEl.style.display = "flex";
+      }
+      function closeModal() {
+        modalEl.style.display = "none";
+      }
+
+      function flashEffect(element, borderColorClass) {
+        element.classList.add("border-2", borderColorClass);
+        setTimeout(() => {
+          element.classList.remove("border-2", borderColorClass);
+        }, 500);
+      }
+
+      function showTemporary(msg) {
+        const el = document.createElement("div");
+        el.className =
+          "fixed bottom-5 right-5 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-lg animate-slideInUp";
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2000);
+      }
+
+      function displayAnswer(Q) {
+        if (Q.type === "mcq")
+          return Q.options && Q.options[Q.answer] ? Q.options[Q.answer] : "—";
+        if (Q.type === "fill")
+          return Array.isArray(Q.answer) ? Q.answer.join(", ") : Q.answer;
+        if (Q.type === "order") return Q.answer.join(" ");
+        return "—";
+      }
+
+      function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      /* ---------------------------
+       Initial Setup
+       --------------------------- */
+      function init() {
+        buildLevelList();
+        renderProfileUI();
+        startLevel(currentLevelIndex);
+      }
+
+      init();
+
+      modalEl.addEventListener("click", (ev) => {
+        if (ev.target === modalEl) closeModal();
+      });
+
+      homeBackBtn.addEventListener("click", () => {
+        location.href = "game-index.html";
+      });
+    </script>
+  </body>
+</html>
