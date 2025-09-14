@@ -1462,10 +1462,10 @@
           const selectedChips = Array.from(
             answerArea.querySelectorAll(".token")
           );
-          if (selectedChips.length === 0) {
-            showModal("Please order the tokens.");
-            return;
-          }
+          // if (selectedChips.length === 0) {
+          //   showModal("Please order the tokens.");
+          //   return;
+          // }
           const userSeq = selectedChips.map((c) => c.textContent.trim());
           userAnswer = userSeq;
           isCorrect = checkOrder(userSeq, Q.answer);
