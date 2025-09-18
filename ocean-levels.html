@@ -260,8 +260,8 @@
             <div class="mt-4 text-xs text-slate-600">
               <div>Each level: 10 conversation prompts</div>
               <div>
-                Pass = at least <strong>7/10</strong> prompts with acceptable
-                fluency
+                Pass = at least <strong>35/50 XP</strong> prompts with
+                acceptable fluency
               </div>
             </div>
           </div>
@@ -328,7 +328,7 @@
                 </div>
                 <div class="text-right">
                   <div class="text-xs text-slate-500">Level XP</div>
-                  <div id="levelXp" class="text-lg font-bold">0 / 10</div>
+                  <div id="levelXp" class="text-lg font-bold">0 / 50</div>
                 </div>
               </div>
             </div>
@@ -636,6 +636,7 @@
       let fluencyTimer = null;
       let confidence = 0; // 0..100
       let inputMode = "voice"; // or 'text'
+      let perTaskXP = currentLevel === 10 ? 7 : 5;
 
       /* -------------------------
    Helpers: storage, unlock checks
@@ -646,7 +647,7 @@
           if (!raw)
             return { perLevelBest: Array(10).fill(0), unlockedLevel: 0 };
           const p = JSON.parse(raw);
-          if (!p.perLevelBest || p.perLevelBest.length !== 10)
+          if (!p.perLevelBest || p.perLevelBest.length !== 11)
             p.perLevelBest = Array(10).fill(0);
           if (typeof p.unlockedLevel !== "number") p.unlockedLevel = 0;
           return p;
@@ -738,7 +739,7 @@
           )}...</div>
         </div>
         <div class="text-xs text-slate-600 text-right">
-          Best: <strong>${passCount} / 10</strong><br/>
+          Best: <strong>${passCount} / 50</strong><br/>
           ${
             unlocked
               ? '<span class="text-green-600">Play</span>'
@@ -773,7 +774,7 @@
         const lv = LEVELS[currentLevel - 1];
         currentLevelTitle.innerText = `Level ${currentLevel} — ${lv.title}`;
         currentLevelSubtitle.innerText = lv.title;
-        levelXpEl.innerText = `${correctCount} / ${lv.prompts.length}`;
+        levelXpEl.innerText = `${correctCount} / 50`;
         retriesEl.innerText = attemptsLeft;
         globalXpEl.innerText = computeGlobalXP();
         // move boat visually by percent of region xp (use profile sum)
@@ -1013,7 +1014,7 @@
         );
         // give feedback and move on or consume retry
         if (correct) {
-          correctCount++;
+          correctCount += 5; // each correct answer gives 5 XP
           assistantText.innerText =
             "Assistant: Good — that was clear. Follow-up:";
           historyAdd("assistant", "Good — that was clear.");
@@ -1048,9 +1049,7 @@
           }
         }
         // update UI counters
-        levelXpEl.innerText = `${correctCount} / ${
-          LEVELS[currentLevel - 1].prompts.length
-        }`;
+        levelXpEl.innerText = `${correctCount} / 50`;
         updateLevelUI();
         stopFluencyTimer();
       }
@@ -1093,8 +1092,8 @@
    Finish & scoring
    ------------------------- */
       function finishLevel() {
-        // level passes if correctCount >=7 (out of 10)
-        const passed = correctCount >= 7;
+        // level passes if correctCount >=35 (out of 50)
+        const passed = correctCount >= 35;
         // update best if improved
         const prevBest = profile.perLevelBest[currentLevel - 1] || 0;
         if (passed && correctCount > prevBest) {
@@ -1102,15 +1101,19 @@
           // unlock next level
           if (profile.unlockedLevel < currentLevel)
             profile.unlockedLevel = currentLevel;
+          // If last level passed, set cityUnlocked true
+          if (currentLevel === 10) {
+            localStorage.setItem("cityUnlocked", "true");
+          }
           saveProfile();
           renderLevelsList();
         }
         // update global xp display
         globalXpEl.innerText = computeGlobalXP();
         // show a modal-like summary in assistant area
-        assistantText.innerText = `Level ${currentLevel} complete — Score: ${correctCount} / ${
-          LEVELS[currentLevel - 1].prompts.length
-        } — ${passed ? "Passed" : "Try again to reach 7/10"}`;
+        assistantText.innerText = `Level ${currentLevel} complete — Score: ${correctCount} / 50 — ${
+          passed ? "Passed" : "Try again to reach 35/50"
+        }`;
         historyAdd("assistant", assistantText.innerText);
         // confetti/celebrate if passed
         if (passed) celebrateLevel();
@@ -1129,7 +1132,7 @@
         if (currentLevel < 10)
           document.getElementById("nextBtn").addEventListener("click", () => {
             if (!passed) {
-              alert("Reach at least 7/10 to unlock next level");
+              alert("Reach at least 35/50 to unlock next level");
               return;
             }
             startLevel(currentLevel + 1);
@@ -1146,7 +1149,22 @@
    Boat / visuals / feedback
    ------------------------- */
       function computeGlobalXP() {
-        return (profile.perLevelBest || []).reduce((a, b) => a + b, 0);
+        // sum all levels XP (index 0-9)
+        let total = 0;
+        if (profile.perLevelBest && profile.perLevelBest.length >= 10) {
+          for (let i = 0; i < 10; i++) {
+            total += profile.perLevelBest[i];
+          }
+          // update master XP at index 10
+          profile.perLevelBest[10] = total;
+          saveProfile();
+          // If any level has 50 XP, add first and last of list in localStorage
+          if (profile.perLevelBest.some((xp) => xp === 50)) {
+            localStorage.setItem("firstLevelXP", profile.perLevelBest[0]);
+            localStorage.setItem("lastLevelXP", profile.perLevelBest[9]);
+          }
+        }
+        return total;
       }
       function flashBoatUp() {
         // visually raise boat container a bit and add glow

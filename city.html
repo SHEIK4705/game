@@ -505,6 +505,34 @@
         localStorage.setItem(CITY_KEY, JSON.stringify(p));
       }
 
+      // New function to check and set cityUnlocked flag
+      function checkCityUnlocked() {
+        const lastLevelBest = profile.perLevelBest[9] || 0;
+        if (lastLevelBest >= 35) {
+          localStorage.setItem("cityUnlocked", "true");
+        } else {
+          localStorage.setItem("cityUnlocked", "false");
+        }
+      }
+
+      // New function to check ocean region 10th level XP and unlock city if >= 35
+      function checkOceanLevel10UnlockCity() {
+        try {
+          const raw = localStorage.getItem(OCEAN_KEY);
+          if (!raw) return;
+          const oceanProfile = JSON.parse(raw);
+          const oceanLevel10XP = oceanProfile?.perLevelBest?.[9] || 0;
+          if (oceanLevel10XP >= 35) {
+            localStorage.setItem("cityUnlocked", "true");
+          }
+        } catch (e) {
+          // ignore errors
+        }
+      }
+
+      // Call this function on load to update cityUnlocked flag based on ocean level 10 XP
+      checkOceanLevel10UnlockCity();
+
       /* =========================
        SCENARIOS (Levels 1..10)
        Each level has 10 turns (Q/A). XP = 1 per correct.
@@ -1823,6 +1851,7 @@
           profile.unlocked[idx + 1] = true;
         }
         saveProfile(profile);
+        checkCityUnlocked();
         bestHereEl.textContent = newBest;
         bestMeter.style.width =
           Math.min(100, (newBest / current.goal) * 100) + "%";

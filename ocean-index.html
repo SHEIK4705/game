@@ -144,7 +144,7 @@
         if (raw) {
           try {
             let p = JSON.parse(raw);
-            if (!p.perLevelBest || p.perLevelBest.length !== 10)
+            if (!p.perLevelBest || p.perLevelBest.length !== 11)
               p.perLevelBest = Array(10).fill(0);
             if (typeof p.unlockedLevel !== "number") p.unlockedLevel = 0;
             profile = p;
@@ -166,8 +166,11 @@
 
       function updateUI() {
         let profile = loadProfile();
-        let totalXp = profile.perLevelBest.reduce((a, b) => a + b, 0);
-        document.getElementById("xp").innerText = totalXp;
+        let totalXp = 0;
+        for (let i = 0; i < 10; i++) {
+          totalXp += profile.perLevelBest[i] || 0;
+        }
+        document.getElementById("xp").innerText = totalXp + " / 500";
 
         const unlocked = checkMountainUnlock();
         const unlockedLevel = unlocked ? profile.unlockedLevel : 0;
@@ -186,7 +189,7 @@
                 Level ${i} – ${getLevelTitle(i)}
               </h2>
               <p class="text-cyan-100">${getLevelDesc(i)}</p>
-              <div class="mt-2 text-cyan-200 text-xs">Best: ${best} / 10</div>
+              <div class="mt-2 text-cyan-200 text-xs">Best: ${best} / 50</div>
               <div class="mt-1 text-cyan-100 text-xs">${hint}</div>
               ${
                 locked
@@ -242,7 +245,7 @@
         let profile = loadProfile();
         let unlockedLevel = profile.unlockedLevel || 0;
         if (n > unlockedLevel + 1) {
-          alert("🔒 Level locked. Score at least 7/10 in previous!");
+          alert("🔒 Level locked. Score at least 35/50 XP in previous!");
           return;
         }
         window.location.href = `ocean-levels.html?level=${n}`;
